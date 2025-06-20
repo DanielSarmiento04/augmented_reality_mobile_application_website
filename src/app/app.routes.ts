@@ -4,8 +4,7 @@ import { LoginComponent } from "./pages/login/login.component";
 
 export const routes: Routes = [
   // { path: 'routines/create', component: RoutinesCreateComponent },
-  { path: 'login', component: LoginComponent },
-  // { path: '', component: LoginComponent },
+  { path: '', component: LoginComponent },
   { path: '', pathMatch: 'full', redirectTo: '' },
   { path: '**', title: 'Not found', redirectTo: '' },
 ]
