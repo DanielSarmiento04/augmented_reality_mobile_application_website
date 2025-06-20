@@ -1,82 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 $primary-color: #2e7d32;
 $accent-color: #1b5e20;
-$bg-color: #edf1f7;
-$card-bg: #ffffff;
+$bg-color: #e8f5e9;
 $input-border: #cfd8dc;
 $button-bg: #2e7d32;
 $button-bg-hover: #256429;
 
+* {
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(-45deg, #e8f5e9, #ffffff, #e0f7fa, #c8e6c9);
+  background-size: 400% 400%;
+  animation: gradientAnimation 12s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .login-container {
+  position: relative;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: $bg-color;
-  padding: 1rem;
+  padding: 2rem;
+  z-index: 1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(46,125,50,0.15), transparent 70%);
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(80px);
+    z-index: 0;
+  }
 }
 
 .login-card {
-  background: $card-bg;
-  padding: 2.5rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  max-width: 400px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
   text-align: center;
-  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 420px;
+  z-index: 2;
 
   .logo {
-    height: 80px;
-    width: 80px;
+    display: block;
+    margin: 0 auto 1rem auto;
+    width: 150px;
+    height: 150px;
     object-fit: contain;
     border-radius: 12px;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
 
   h2 {
     color: $primary-color;
+    margin-bottom: 2rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
   }
 
   form {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+
+    label {
+      font-size: 0.85rem;
+      color: $accent-color;
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+    }
 
     input {
       padding: 0.75rem;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid $input-border;
+      background: rgba(255, 255, 255, 0.9);
       font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.3s;
 
       &:focus {
         border-color: $primary-color;
+        outline: none;
       }
     }
+  }
 
-    button {
-      padding: 0.75rem;
-      background: $button-bg;
-      color: white;
-      border: none;
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: $button-bg;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    i {
       font-size: 1rem;
-      font-weight: 500;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
+    }
 
-      &:hover {
-        background: $button-bg-hover;
-      }
+    &:hover {
+      background: $button-bg-hover;
+    }
 
-      &:disabled {
-        background: gray;
-        cursor: not-allowed;
-      }
+    &:disabled {
+      background: gray;
+      cursor: not-allowed;
     }
   }
 }

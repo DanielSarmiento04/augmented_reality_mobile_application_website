@@ -1,11 +1,19 @@
 <div class="login-container">
   <div class="login-card">
-    <img src="assets/logo.jpeg" alt="UIS Logo" class="logo">
-    <h2>Login</h2>
-    <form (ngSubmit)="onLogin()" [formGroup]="loginForm">
-      <input type="email" formControlName="email" placeholder="Email" required>
-      <input type="password" formControlName="password" placeholder="Password" required>
-      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    <img src="assets/logo.jpeg" alt="UIS Logo" class="logo" />
+    <h2>Bienvenido</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <label for="email">Correo:</label>
+        <input type="email" id="email" formControlName="email" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" formControlName="password" required />
+      </div>
+      <button type="submit" [disabled]="loginForm.invalid">
+        <i class="fa fa-sign-in-alt"></i> Login
+      </button>
     </form>
   </div>
 </div>
