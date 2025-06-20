@@ -1,3 +1,69 @@
 /* You can add global styles to this file, and also import other style files */
 @use 'tailwindcss';
 
+// styles.scss
+
+$primary-color: #2e7d32; // UIS green
+$accent-color: #1b5e20;
+$background-color: #f4f4f4;
+$font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+body {
+  font-family: $font-stack;
+  margin: 0;
+  background-color: $background-color;
+  color: #333;
+}
+
+.header {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .logo {
+      height: 60px;
+      width: auto;
+    }
+
+    .site-title {
+      font-size: 1.75rem;
+      color: $primary-color;
+      margin: 0;
+    }
+  }
+}
+
+.main-content {
+  padding: 2rem;
+
+  .intro {
+    background-color: white;
+    padding: 2rem;
+    border-left: 6px solid $primary-color;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+
+    h2 {
+      color: $accent-color;
+      margin-top: 0;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  }
+}
+
+.footer {
+  background-color: $primary-color;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
