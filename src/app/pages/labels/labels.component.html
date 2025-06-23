@@ -1,0 +1,177 @@
+<div class="annotation-workspace">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">YOLO Annotation Tool</h1>
+      <span class="project-name" *ngIf="currentProject()">
+        {{ currentProject()?.name }}
+      </span>
+    </div>
+
+    <div class="header-right">
+      <button class="btn btn--secondary btn--sm" (click)="toggleTheme()">
+        {{ currentTheme() === 'dark' ? '☀️' : '🌙' }} Toggle Theme
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Toolbar -->
+  <div class="app-toolbar">
+    <custom-toolbar
+      [actions]="toolbarActions()"
+      [showProgress]="true"
+      [progress]="projectProgress()"
+      [statusText]="statusMessage()"
+      [statusType]="statusType()"
+      (actionTriggered)="onToolbarAction($event)">
+    </custom-toolbar>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="app-main">
+    <!-- Sidebar -->
+    <aside class="app-sidebar" [class.is-open]="sidebarOpen()">
+      <div class="sidebar-content">
+        <!-- Class Selector -->
+        <section class="sidebar-section">
+          <custom-class-selector
+            [classes]="availableClasses()"
+            [selectedClassId]="selectedClassId()"
+            (classSelected)="onClassSelected($event)"
+            (classAdded)="onClassAdded($event)"
+            (classUpdated)="onClassUpdated($event)"
+            (classDeleted)="onClassDeleted($event)">
+          </custom-class-selector>
+        </section>
+
+        <!-- Image List -->
+        <section class="sidebar-section">
+          <h3>Images</h3>
+          <div class="image-list" role="list">
+            <div
+              *ngFor="let image of currentProject()?.images; let i = index; trackBy: trackByImageId"
+              class="image-item"
+              [class.image-item--current]="i === currentImageIndex()"
+              [class.image-item--completed]="image.isCompleted"
+              role="listitem"
+              [attr.aria-label]="'Image ' + (i + 1) + ': ' + image.filename + (image.isCompleted ? ' (completed)' : '')"
+              tabindex="0"
+              (click)="selectImage(i)"
+              (keydown.enter)="selectImage(i)"
+              (keydown.space)="selectImage(i); $event.preventDefault()">
+
+              <div class="image-item__thumbnail">
+                <img [src]="image.path" [alt]="image.filename" loading="lazy">
+              </div>
+
+              <div class="image-item__info">
+                <div class="image-item__name">{{ image.filename }}</div>
+                <div class="image-item__stats">
+                  {{ image.boundingBoxes.length }} boxes
+                </div>
+              </div>
+
+              <div class="image-item__status">
+                <span *ngIf="image.isCompleted" class="status-icon status-icon--completed" aria-label="Completed">✓</span>
+                <span *ngIf="!image.isCompleted && image.boundingBoxes.length > 0" class="status-icon status-icon--partial" aria-label="In progress">◐</span>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div class="image-list__empty" *ngIf="!currentProject()?.images?.length">
+              <p>No images loaded</p>
+              <button class="btn btn--primary btn--sm" (click)="loadImages()">
+                Load Images
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Annotation List -->
+        <section class="sidebar-section" *ngIf="currentImage()">
+          <h3>Annotations</h3>
+          <div class="annotation-list" role="list">
+            <div
+              *ngFor="let box of currentImage()?.boundingBoxes; trackBy: trackByBoxId"
+              class="annotation-item"
+              [class.annotation-item--selected]="box.id === selectedBoxId()"
+              role="listitem"
+              [attr.aria-label]="'Annotation: ' + box.className"
+              tabindex="0"
+              (click)="selectBox(box.id)"
+              (keydown.enter)="selectBox(box.id)"
+              (keydown.delete)="deleteBox(box.id)">
+
+              <div class="annotation-item__color"
+                   [style.background-color]="getClassColor(box.classId)">
+              </div>
+
+              <div class="annotation-item__info">
+                <div class="annotation-item__name">{{ box.className }}</div>
+                <div class="annotation-item__coords">
+                  {{ (box.x * 100).toFixed(1) }}%, {{ (box.y * 100).toFixed(1) }}%
+                </div>
+              </div>
+
+              <button
+                class="btn btn--icon btn--xs btn--danger"
+                (click)="deleteBox(box.id); $event.stopPropagation()"
+                [attr.aria-label]="'Delete ' + box.className + ' annotation'">
+                🗑️
+              </button>
+            </div>
+
+            <!-- Empty state -->
+            <div class="annotation-list__empty" *ngIf="!currentImage()?.boundingBoxes?.length">
+              <p>No annotations yet</p>
+              <p class="help-text">Draw boxes on the image to create annotations</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- Main Canvas Area -->
+    <div class="app-content">
+      <div class="app-workspace" *ngIf="currentImage(); else noImageState">
+        <custom-canvas-annotation
+          [currentImage]="currentImage()"
+          [availableClasses]="availableClasses()"
+          [selectedClassId]="selectedClassId()"
+          (boxCreated)="onBoxCreated($event)"
+          (boxUpdated)="onBoxUpdated($event)"
+          (boxDeleted)="onBoxDeleted($event)"
+          (boxSelected)="onBoxSelected($event)"
+          (classSelected)="onClassSelected($event)">
+        </custom-canvas-annotation>
+      </div>
+
+      <!-- No Image State -->
+      <ng-template #noImageState>
+        <div class="empty-state">
+          <div class="empty-state__icon">📷</div>
+          <h2>No Image Selected</h2>
+          <p>Select an image from the sidebar or load a new project to get started.</p>
+          <div class="empty-state__actions">
+            <button class="btn btn--primary" (click)="createNewProject()">
+              New Project
+            </button>
+            <button class="btn btn--secondary" (click)="loadProject()">
+              Load Project
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </main>
+
+  <!-- Mobile sidebar toggle -->
+  <button
+    class="sidebar-toggle"
+    [class.is-active]="sidebarOpen()"
+    (click)="toggleSidebar()"
+    [attr.aria-label]="sidebarOpen() ? 'Close sidebar' : 'Open sidebar'"
+    [attr.aria-expanded]="sidebarOpen()">
+    <span class="hamburger"></span>
+  </button>
+</div>

@@ -1,10 +1,12 @@
 import { Routes } from "@angular/router";
-// import { RoutinesCreateComponent } from "./components/routines/routines-create/routines-create.component";
 import { LoginComponent } from "./pages/login/login.component";
+import { DashboardComponent } from "./pages/dashboard/dashboard.component";
+import { LabelsComponent } from "./pages/labels/labels.component";
 
 export const routes: Routes = [
-  // { path: 'routines/create', component: RoutinesCreateComponent },
-  { path: '', component: LoginComponent },
-  { path: '', pathMatch: 'full', redirectTo: '' },
-  { path: '**', title: 'Not found', redirectTo: '' },
-]
+  { path: '', redirectTo: '/labels', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: 'labels', component: LabelsComponent, title: 'YOLO Annotation Tool' },
+  { path: '**', redirectTo: '/labels' }
+];

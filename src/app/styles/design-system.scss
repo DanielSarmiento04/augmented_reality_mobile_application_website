@@ -1,0 +1,341 @@
+// YOLO Annotation Tool - Design System
+// CSS Custom Properties for theming and consistency
+
+:root {
+  // Color Palette
+  --primary-color: #2563eb;
+  --primary-color-light: #dbeafe;
+  --primary-color-dark: #1d4ed8;
+  --primary-color-rgb: 37, 99, 235;
+
+  --secondary-color: #64748b;
+  --secondary-color-light: #f1f5f9;
+  --secondary-color-dark: #475569;
+
+  --accent-color: #7c3aed;
+  --accent-color-light: #ede9fe;
+  --accent-color-dark: #5b21b6;
+
+  // Semantic Colors
+  --success-color: #059669;
+  --success-color-light: #d1fae5;
+  --success-color-dark: #047857;
+
+  --warning-color: #d97706;
+  --warning-color-light: #fef3c7;
+  --warning-color-dark: #b45309;
+
+  --error-color: #dc2626;
+  --error-color-light: #fee2e2;
+  --error-color-dark: #b91c1c;
+
+  --info-color: #0891b2;
+  --info-color-light: #cffafe;
+  --info-color-dark: #0e7490;
+
+  // Neutral Colors (Light Theme)
+  --surface-color: #ffffff;
+  --surface-secondary: #f8fafc;
+  --surface-tertiary: #f1f5f9;
+  --surface-hover: #f8fafc;
+  --surface-active: #e2e8f0;
+  --surface-disabled: #f1f5f9;
+
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-disabled: #cbd5e1;
+  --text-inverse: #ffffff;
+
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
+  --border-color-focus: var(--primary-color);
+
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hover: rgba(0, 0, 0, 0.15);
+
+  // Focus and Interaction
+  --focus-color: var(--primary-color);
+  --focus-color-rgb: var(--primary-color-rgb);
+
+  // Form Elements
+  --input-background: var(--surface-color);
+  --input-border: var(--border-color);
+  --input-focus-border: var(--focus-color);
+  --input-disabled-background: var(--surface-disabled);
+
+  // Typography
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+
+  --font-size-xs: 0.75rem;    // 12px
+  --font-size-sm: 0.875rem;   // 14px
+  --font-size-base: 1rem;     // 16px
+  --font-size-md: 1rem;       // 16px
+  --font-size-lg: 1.125rem;   // 18px
+  --font-size-xl: 1.25rem;    // 20px
+  --font-size-2xl: 1.5rem;    // 24px
+  --font-size-3xl: 1.875rem;  // 30px
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  // Spacing Scale (0.25rem = 4px base)
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-xs: 0.25rem;   // 4px
+  --spacing-sm: 0.5rem;    // 8px
+  --spacing-md: 0.75rem;   // 12px
+  --spacing-lg: 1rem;      // 16px
+  --spacing-xl: 1.25rem;   // 20px
+  --spacing-2xl: 1.5rem;   // 24px
+  --spacing-3xl: 2rem;     // 32px
+  --spacing-4xl: 2.5rem;   // 40px
+  --spacing-5xl: 3rem;     // 48px
+
+  // Border Radius
+  --border-radius-none: 0;
+  --border-radius-sm: 0.25rem;  // 4px
+  --border-radius-md: 0.5rem;   // 8px
+  --border-radius-lg: 0.75rem;  // 12px
+  --border-radius-xl: 1rem;     // 16px
+  --border-radius-full: 9999px;
+
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  // Z-Index Scale
+  --z-dropdown: 1000;
+  --z-sticky: 1010;
+  --z-fixed: 1020;
+  --z-modal-backdrop: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-tooltip: 1060;
+
+  // Animation Timing
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 350ms;
+
+  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Layout
+  --container-max-width: 1200px;
+  --sidebar-width: 320px;
+  --toolbar-height: 56px;
+  --header-height: 64px;
+
+  // Annotation-specific
+  --annotation-box-border-width: 2px;
+  --annotation-box-border-width-selected: 3px;
+  --annotation-handle-size: 8px;
+  --annotation-label-padding: 4px 8px;
+  --canvas-background: #f8fafc;
+  --grid-color: rgba(0, 0, 0, 0.1);
+  --grid-size: 20px;
+
+  // Class colors for annotations (predefined palette)
+  --class-color-0: #ef4444;  // red
+  --class-color-1: #f97316;  // orange
+  --class-color-2: #eab308;  // yellow
+  --class-color-3: #22c55e;  // green
+  --class-color-4: #06b6d4;  // cyan
+  --class-color-5: #3b82f6;  // blue
+  --class-color-6: #8b5cf6;  // violet
+  --class-color-7: #ec4899;  // pink
+  --class-color-8: #f59e0b;  // amber
+  --class-color-9: #10b981;  // emerald
+}
+
+// Dark Theme
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Override colors for dark mode
+    --primary-color-light: #1e3a8a;
+    --secondary-color-light: #374151;
+    --accent-color-light: #4c1d95;
+
+    --success-color-light: #064e3b;
+    --warning-color-light: #92400e;
+    --error-color-light: #7f1d1d;
+    --info-color-light: #0c4a6e;
+
+    --surface-color: #1f2937;
+    --surface-secondary: #111827;
+    --surface-tertiary: #0f172a;
+    --surface-hover: #374151;
+    --surface-active: #4b5563;
+    --surface-disabled: #374151;
+
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --text-disabled: #6b7280;
+
+    --border-color: #374151;
+    --border-color-hover: #4b5563;
+
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color-hover: rgba(0, 0, 0, 0.4);
+
+    --input-background: #374151;
+    --input-border: #4b5563;
+    --input-disabled-background: #1f2937;
+
+    --canvas-background: #111827;
+    --grid-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// High Contrast Theme
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000000;
+    --border-color-hover: #333333;
+    --text-secondary: #000000;
+    --annotation-box-border-width: 3px;
+    --annotation-box-border-width-selected: 4px;
+  }
+
+  [data-theme="dark"] {
+    --border-color: #ffffff;
+    --border-color-hover: #cccccc;
+    --text-secondary: #ffffff;
+  }
+}
+
+// Reduced Motion
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+// Manual theme switching (light theme uses default variables)
+
+[data-theme="dark"] {
+  --primary-color-light: #1e3a8a;
+  --secondary-color-light: #374151;
+  --accent-color-light: #4c1d95;
+
+  --success-color-light: #064e3b;
+  --warning-color-light: #92400e;
+  --error-color-light: #7f1d1d;
+  --info-color-light: #0c4a6e;
+
+  --surface-color: #1f2937;
+  --surface-secondary: #111827;
+  --surface-tertiary: #0f172a;
+  --surface-hover: #374151;
+  --surface-active: #4b5563;
+  --surface-disabled: #374151;
+
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --text-disabled: #6b7280;
+
+  --border-color: #374151;
+  --border-color-hover: #4b5563;
+
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-hover: rgba(0, 0, 0, 0.4);
+
+  --input-background: #374151;
+  --input-border: #4b5563;
+  --input-disabled-background: #1f2937;
+
+  --canvas-background: #111827;
+  --grid-color: rgba(255, 255, 255, 0.1);
+}
+
+// Utility classes for common patterns
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-success { color: var(--success-color); }
+.text-warning { color: var(--warning-color); }
+.text-error { color: var(--error-color); }
+.text-info { color: var(--info-color); }
+
+.bg-primary { background-color: var(--primary-color); }
+.bg-surface { background-color: var(--surface-color); }
+.bg-surface-secondary { background-color: var(--surface-secondary); }
+
+.border-default { border: 1px solid var(--border-color); }
+.border-focus { border: 1px solid var(--focus-color); }
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+
+// Animation utilities
+.transition-all {
+  transition: all var(--transition-normal) var(--easing-ease-in-out);
+}
+
+.transition-colors {
+  transition: color var(--transition-fast) var(--easing-ease-in-out),
+              background-color var(--transition-fast) var(--easing-ease-in-out),
+              border-color var(--transition-fast) var(--easing-ease-in-out);
+}
+
+.transition-transform {
+  transition: transform var(--transition-normal) var(--easing-ease-in-out);
+}
+
+// Focus styles
+.focus-visible {
+  &:focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+}
+
+// Layout utilities
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+// Print styles
+@media print {
+  :root {
+    --surface-color: white;
+    --text-primary: black;
+    --border-color: #ccc;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
