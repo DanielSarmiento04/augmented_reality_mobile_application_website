@@ -177,13 +177,21 @@ export class ToolbarComponent {
         icon: '📂',
         shortcut: 'Ctrl+O'
       },
+      { id: 'separator-1', label: '', icon: '', type: 'separator' },
+      {
+        id: 'upload-images',
+        label: 'Upload Images',
+        icon: '📷',
+        shortcut: 'Ctrl+U'
+      },
+      { id: 'separator-2', label: '', icon: '', type: 'separator' },
       {
         id: 'save-project',
         label: 'Save Project',
         icon: '💾',
         shortcut: 'Ctrl+S'
       },
-      { id: 'separator-1', label: '', icon: '', type: 'separator' },
+      { id: 'separator-3', label: '', icon: '', type: 'separator' },
       {
         id: 'undo',
         label: 'Undo',
@@ -196,7 +204,7 @@ export class ToolbarComponent {
         icon: '↷',
         shortcut: 'Ctrl+Y'
       },
-      { id: 'separator-2', label: '', icon: '', type: 'separator' },
+      { id: 'separator-4', label: '', icon: '', type: 'separator' },
       {
         id: 'zoom-in',
         label: 'Zoom In',

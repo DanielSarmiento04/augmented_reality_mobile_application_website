@@ -22,6 +22,7 @@ export interface ImageAnnotation {
   id: string;
   filename: string;
   path: string;
+  url?: string; // Base64 data URL for in-memory images
   width: number;
   height: number;
   boundingBoxes: BoundingBox[];

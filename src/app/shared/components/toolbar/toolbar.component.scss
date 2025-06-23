@@ -2,34 +2,49 @@
 .toolbar {
   display: flex;
   align-items: center;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-sm);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   gap: var(--spacing-sm);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   user-select: none;
+  min-height: 44px;
+  width: 100%;
   
   &[aria-orientation="vertical"] {
     flex-direction: column;
     width: fit-content;
+    min-height: auto;
   }
   
   &__section {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
     
     &--main {
       flex: 1;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--spacing-xs);
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
     
     &--progress {
       margin: 0 var(--spacing-md);
+      flex-shrink: 0;
     }
     
     &--status {
       margin-left: auto;
+      flex-shrink: 0;
     }
     
     .toolbar[aria-orientation="vertical"] & {
@@ -38,6 +53,8 @@
       
       &--main {
         flex: none;
+        flex-wrap: wrap;
+        overflow-x: visible;
       }
       
       &--progress,
@@ -45,27 +62,28 @@
         margin: var(--spacing-sm) 0;
       }
     }
-  }
-  
-  &__button {
+  }  &__button {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid transparent;
     border-radius: var(--border-radius-sm);
     background: transparent;
     color: var(--text-primary);
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 36px;
+    transition: all 0.15s ease;
+    min-width: 40px;
     height: 36px;
     position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
     
     &:hover {
       background: var(--surface-hover);
-      border-color: var(--border-color);
+      border-color: var(--border-color-hover);
       transform: translateY(-1px);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
@@ -73,18 +91,19 @@
     &:focus {
       outline: none;
       border-color: var(--focus-color);
-      box-shadow: 0 0 0 3px rgba(var(--focus-color-rgb), 0.3);
+      box-shadow: 0 0 0 2px rgba(var(--focus-color-rgb), 0.2);
     }
     
     &:active {
       transform: translateY(0);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
     
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
       pointer-events: none;
+      transform: none;
     }
     
     &--active {
@@ -95,6 +114,7 @@
       &:hover {
         background: var(--primary-color);
         color: white;
+        transform: translateY(-1px);
       }
     }
     
@@ -106,17 +126,18 @@
         
         &:hover {
           background: var(--primary-color-dark);
+          transform: translateY(-1px);
         }
       }
     }
-    
+
     .toolbar[aria-orientation="vertical"] & {
       width: 100%;
       justify-content: flex-start;
       min-width: 120px;
     }
   }
-  
+
   &__icon {
     font-size: var(--font-size-md);
     line-height: 1;
@@ -127,20 +148,20 @@
     width: 20px;
     height: 20px;
   }
-  
+
   &__label {
     font-weight: var(--font-weight-medium);
     white-space: nowrap;
-    
+
     .toolbar[aria-orientation="horizontal"] & {
       display: none;
-      
+
       @media (min-width: 768px) {
         display: inline;
       }
     }
   }
-  
+
   &__shortcut {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
@@ -150,42 +171,43 @@
     font-family: var(--font-mono);
     margin-left: auto;
   }
-  
+
   &__separator {
     width: 1px;
-    height: 24px;
+    height: 20px;
     background: var(--border-color);
-    margin: 0 var(--spacing-xs);
+    margin: 0 var(--spacing-sm);
     flex-shrink: 0;
-    
+    opacity: 0.6;
+
     .toolbar[aria-orientation="vertical"] & {
       width: 100%;
       height: 1px;
-      margin: var(--spacing-xs) 0;
+      margin: var(--spacing-sm) 0;
     }
   }
-  
+
   &__status {
     font-size: var(--font-size-sm);
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--border-radius-sm);
     font-weight: var(--font-weight-medium);
-    
+
     &--info {
       color: var(--info-color);
       background: var(--info-color-light);
     }
-    
+
     &--success {
       color: var(--success-color);
       background: var(--success-color-light);
     }
-    
+
     &--warning {
       color: var(--warning-color);
       background: var(--warning-color-light);
     }
-    
+
     &--error {
       color: var(--error-color);
       background: var(--error-color-light);
@@ -199,7 +221,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   min-width: 120px;
-  
+
   &__track {
     flex: 1;
     height: 8px;
@@ -208,14 +230,14 @@
     overflow: hidden;
     position: relative;
   }
-  
+
   &__fill {
     height: 100%;
     background: linear-gradient(90deg, var(--success-color), var(--primary-color));
     border-radius: 4px;
     transition: width 0.3s ease;
     position: relative;
-    
+
     &::after {
       content: '';
       position: absolute;
@@ -227,7 +249,7 @@
       animation: shimmer 2s infinite;
     }
   }
-  
+
   &__text {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
@@ -247,11 +269,11 @@
   .toolbar__label {
     display: none !important;
   }
-  
+
   .toolbar__shortcut {
     display: none !important;
   }
-  
+
   .toolbar__button {
     min-width: 32px;
     height: 32px;
@@ -266,38 +288,38 @@
     gap: var(--spacing-xs);
     overflow-x: auto;
     scrollbar-width: thin;
-    
+
     &::-webkit-scrollbar {
       height: 4px;
     }
-    
+
     &::-webkit-scrollbar-track {
       background: var(--surface-secondary);
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background: var(--border-color);
       border-radius: 2px;
     }
-    
+
     &__button {
       min-width: 40px;
       height: 40px;
       padding: var(--spacing-sm);
       flex-shrink: 0;
     }
-    
+
     &__label {
       display: none;
     }
-    
+
     &__shortcut {
       display: none;
     }
-    
+
     &__section--progress {
       margin: 0 var(--spacing-sm);
-      
+
       .progress-bar {
         min-width: 80px;
       }
@@ -310,12 +332,12 @@
   .toolbar__button {
     min-width: 44px;
     height: 44px;
-    
+
     &:hover {
       transform: none;
       box-shadow: none;
     }
-    
+
     &:active {
       background: var(--surface-active);
     }
@@ -327,19 +349,19 @@
   .toolbar {
     border-width: 2px;
   }
-  
+
   .toolbar__button {
     border-width: 2px;
-    
+
     &:focus {
       box-shadow: 0 0 0 4px rgba(var(--focus-color-rgb), 0.5);
     }
-    
+
     &--active {
       border-width: 3px;
     }
   }
-  
+
   .toolbar__separator {
     background: var(--text-primary);
   }
@@ -351,11 +373,11 @@
   .progress-bar__fill {
     transition: none;
   }
-  
+
   .toolbar__button:hover {
     transform: none;
   }
-  
+
   .progress-bar__fill::after {
     animation: none;
   }
@@ -379,7 +401,7 @@
   .toolbar {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
-  
+
   .progress-bar__fill::after {
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   }

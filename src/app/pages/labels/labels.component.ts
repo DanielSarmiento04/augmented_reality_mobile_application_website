@@ -142,6 +142,9 @@ export class LabelsComponent implements OnInit, OnDestroy {
       case 'open-project':
         this.loadProject();
         break;
+      case 'upload-images':
+        this.uploadImages();
+        break;
       case 'save-project':
         this.saveProject();
         break;
@@ -376,6 +379,99 @@ export class LabelsComponent implements OnInit, OnDestroy {
     this.annotationService.markImageAsCompleted();
     this.statusMessage.set('Image marked as completed');
     this.statusType.set('success');
+  }
+
+  uploadImages() {
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+
+    input.onchange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const files = target.files;
+
+      if (files && files.length > 0) {
+        this.handleImageFiles(Array.from(files));
+      }
+    };
+
+    input.click();
+  }
+
+  private handleImageFiles(files: File[]) {
+    const project = this.currentProject();
+    if (!project) {
+      this.statusMessage.set('Please create a project first');
+      this.statusType.set('warning');
+      return;
+    }
+
+    this.statusMessage.set(`Processing ${files.length} image(s)...`);
+    this.statusType.set('info');
+
+    const imagePromises = files.map(file => this.processImageFile(file));
+
+    Promise.all(imagePromises).then(images => {
+      const validImages = images.filter(img => img !== null);
+
+      if (validImages.length > 0) {
+        // Add images to current project
+        const updatedImages = [...project.images, ...validImages];
+        this.annotationService.updateProject({ images: updatedImages });
+
+        this.statusMessage.set(`Added ${validImages.length} image(s) to project`);
+        this.statusType.set('success');
+      } else {
+        this.statusMessage.set('No valid images were processed');
+        this.statusType.set('warning');
+      }
+    }).catch(error => {
+      this.statusMessage.set(`Error processing images: ${error.message}`);
+      this.statusType.set('error');
+    });
+  }
+
+  private processImageFile(file: File): Promise<ImageAnnotation | null> {
+    return new Promise((resolve) => {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        console.warn(`Skipping non-image file: ${file.name}`);
+        resolve(null);
+        return;
+      }
+
+      // Create FileReader to read the image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const imageAnnotation: ImageAnnotation = {
+            id: crypto.randomUUID(),
+            filename: file.name,
+            path: '', // Will be set when saved
+            url: e.target?.result as string, // Base64 data URL
+            width: img.width,
+            height: img.height,
+            boundingBoxes: [],
+            isCompleted: false,
+            lastModified: new Date()
+          };
+          resolve(imageAnnotation);
+        };
+        img.onerror = () => {
+          console.warn(`Failed to load image: ${file.name}`);
+          resolve(null);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => {
+        console.warn(`Failed to read file: ${file.name}`);
+        resolve(null);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   // Helper Methods

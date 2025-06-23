@@ -4,9 +4,9 @@ import { DashboardComponent } from "./pages/dashboard/dashboard.component";
 import { LabelsComponent } from "./pages/labels/labels.component";
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/labels', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'labels', component: LabelsComponent, title: 'YOLO Annotation Tool' },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'labels', component: LabelsComponent, title: 'YOLO Annotation Tool' },
   { path: '**', redirectTo: '/labels' }
 ];
