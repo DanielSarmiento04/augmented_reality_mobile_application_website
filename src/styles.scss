@@ -166,6 +166,7 @@ input, textarea, select {
   flex: 1;
   display: flex;
   overflow: hidden;
+  margin-top: 0;
 }
 
 .app-sidebar {
@@ -188,11 +189,14 @@ input, textarea, select {
 .app-toolbar {
   background: var(--surface-color);
   border-bottom: 1px solid var(--border-color);
-  padding: var(--spacing-xs) var(--spacing-md);
-  min-height: 52px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  height: var(--toolbar-height);
   display: flex;
   align-items: center;
   box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: var(--header-height);
+  z-index: var(--z-sticky);
 }
 
 .app-workspace {

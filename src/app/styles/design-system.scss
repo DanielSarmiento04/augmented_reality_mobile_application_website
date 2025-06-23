@@ -40,6 +40,7 @@
   --surface-hover: #f8fafc;
   --surface-active: #e2e8f0;
   --surface-disabled: #f1f5f9;
+  --canvas-background: #fafbfc;
 
   --text-primary: #0f172a;
   --text-secondary: #64748b;
@@ -109,43 +110,94 @@
   --canvas-min-height: 600px;
   --max-content-width: 1400px;
 
-  // Border Radius
-  --border-radius-none: 0;
-  --border-radius-sm: 0.25rem;  // 4px
-  --border-radius-md: 0.5rem;   // 8px
-  --border-radius-lg: 0.75rem;  // 12px
-  --border-radius-xl: 1rem;     // 16px
-  --border-radius-full: 9999px;
+  // Z-index Scale
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
 
-  // Shadows
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  // Box Shadows
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
-  // Z-Index Scale
-  --z-dropdown: 1000;
-  --z-sticky: 1010;
-  --z-fixed: 1020;
-  --z-modal-backdrop: 1030;
-  --z-modal: 1040;
-  --z-popover: 1050;
-  --z-tooltip: 1060;
+  // Focus and Interaction
+  --focus-color: var(--primary-color);
+  --focus-color-rgb: var(--primary-color-rgb);
 
-  // Animation Timing
-  --transition-fast: 150ms;
-  --transition-normal: 250ms;
-  --transition-slow: 350ms;
+  // Form Elements
+  --input-background: var(--surface-color);
+  --input-border: var(--border-color);
+  --input-focus-border: var(--focus-color);
+  --input-disabled-background: var(--surface-disabled);
 
-  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  // Typography
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
 
-  // Layout
-  --container-max-width: 1200px;
-  --sidebar-width: 320px;
-  --toolbar-height: 56px;
+  --font-size-xs: 0.75rem;    // 12px
+  --font-size-sm: 0.875rem;   // 14px
+  --font-size-base: 1rem;     // 16px
+  --font-size-md: 1rem;       // 16px
+  --font-size-lg: 1.125rem;   // 18px
+  --font-size-xl: 1.25rem;    // 20px
+  --font-size-2xl: 1.5rem;    // 24px
+  --font-size-3xl: 1.875rem;  // 30px
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  // Spacing Scale (0.25rem = 4px base)
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-xs: 0.25rem;   // 4px
+  --spacing-sm: 0.5rem;    // 8px
+  --spacing-md: 0.75rem;   // 12px
+  --spacing-lg: 1rem;      // 16px
+  --spacing-xl: 1.25rem;   // 20px
+  --spacing-2xl: 1.5rem;   // 24px
+  --spacing-3xl: 2rem;     // 32px
+  --spacing-4xl: 2.5rem;   // 40px
+  --spacing-5xl: 3rem;     // 48px
+  --spacing-6xl: 4rem;     // 64px
+
+  // Layout Dimensions
   --header-height: 64px;
+  --toolbar-height: 64px;
+  --sidebar-width: 340px;
+  --canvas-min-width: 900px;
+  --canvas-min-height: 600px;
+  --max-content-width: 1400px;
+
+  // Z-index Scale
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+
+  // Box Shadows
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   // Annotation-specific
   --annotation-box-border-width: 2px;
