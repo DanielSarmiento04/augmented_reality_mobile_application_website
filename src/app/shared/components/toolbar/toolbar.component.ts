@@ -1,15 +1,16 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, signal, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface ToolbarAction {
   id: string;
   label: string;
-  icon: string;
-  shortcut?: string;
+  icon?: string;
+  tooltip?: string;
   disabled?: boolean;
-  type?: 'button' | 'toggle' | 'separator' | 'hidden';
-  active?: boolean;
-  group?: string;
+  separator?: boolean;
+  priority?: number; // Higher priority actions get more prominent placement
+  shortcut?: string;
+  visible?: boolean;
 }
 
 @Component({
@@ -17,287 +18,379 @@ export interface ToolbarAction {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="toolbar"
-         role="toolbar"
-         [attr.aria-label]="ariaLabel()"
-         [attr.aria-orientation]="orientation()">
+    <div class="toolbar" 
+         [attr.aria-orientation]="orientation"
+         [style.--toolbar-columns]="optimalColumns()"
+         [style.--toolbar-gap]="gridGap()"
+         role="toolbar">
+      
+      <!-- Progress section for loading states -->
+      <div class="toolbar__section toolbar__section--progress" *ngIf="showProgress">
+        <div class="toolbar__progress">
+          <div class="toolbar__progress-bar" [style.width.%]="progress"></div>
+        </div>
+      </div>
 
+      <!-- Main action grid -->
       <div class="toolbar__section toolbar__section--main">
-        <ng-container *ngFor="let action of actions(); trackBy: trackByActionId">
-
-          <!-- Separator -->
-          <div *ngIf="action.type === 'separator'"
-               class="toolbar__separator"
-               role="separator"
-               [attr.aria-orientation]="orientation() === 'horizontal' ? 'vertical' : 'horizontal'">
-          </div>
-
-          <!-- Button/Toggle -->
-          <button *ngIf="action.type !== 'separator'"
-                  class="toolbar__button"
-                  [class.toolbar__button--active]="action.active"
-                  [class.toolbar__button--toggle]="action.type === 'toggle'"
-                  [disabled]="action.disabled"
-                  [attr.aria-label]="getButtonAriaLabel(action)"
-                  [attr.aria-pressed]="action.type === 'toggle' ? action.active : null"
-                  [attr.title]="getTooltip(action)"
-                  (click)="onActionClick(action)"
-                  type="button">
-
-            <span class="toolbar__icon" [attr.aria-hidden]="true">
-              {{ action.icon }}
-            </span>
-
-            <span class="toolbar__label"
-                  [class.sr-only]="compact()">
-              {{ action.label }}
-            </span>
-
-            <span *ngIf="action.shortcut"
-                  class="toolbar__shortcut"
-                  [class.sr-only]="compact()"
-                  [attr.aria-label]="'Shortcut: ' + action.shortcut">
+        <div class="toolbar__grid" *ngFor="let row of actionRows(); trackBy: trackByRow">
+          <button
+            *ngFor="let action of row; trackBy: trackByAction"
+            type="button"
+            class="toolbar__button"
+            [class.toolbar__button--priority]="action.priority && action.priority > 1"
+            [class.toolbar__button--disabled]="action.disabled"
+            [class.toolbar__button--separator]="action.separator"
+            [style.grid-column-end]="getColumnSpan(action)"
+            [disabled]="action.disabled"
+            [title]="getTooltip(action)"
+            [attr.aria-label]="action.label"
+            [attr.data-action]="action.id"
+            (click)="handleAction(action)"
+            (keydown.enter)="handleAction(action)"
+            (keydown.space)="handleAction(action)">
+            
+            <!-- Icon if provided -->
+            <span class="toolbar__button-icon" *ngIf="action.icon" [innerHTML]="action.icon"></span>
+            
+            <!-- Label -->
+            <span class="toolbar__button-label">{{ action.label }}</span>
+            
+            <!-- Keyboard shortcut hint -->
+            <span class="toolbar__button-shortcut" *ngIf="action.shortcut && showShortcuts">
               {{ action.shortcut }}
             </span>
           </button>
-        </ng-container>
-      </div>
-
-      <!-- Progress section -->
-      <div class="toolbar__section toolbar__section--progress"
-           *ngIf="showProgress()"
-           [attr.aria-label]="'Progress: ' + progress().percentage + '%'">
-        <div class="progress-bar">
-          <div class="progress-bar__track">
-            <div class="progress-bar__fill"
-                 [style.width.%]="progress().percentage"
-                 role="progressbar"
-                 [attr.aria-valuenow]="progress().percentage"
-                 [attr.aria-valuemin]="0"
-                 [attr.aria-valuemax]="100"
-                 [attr.aria-label]="'Annotation progress: ' + progress().completed + ' of ' + progress().total + ' images completed'">
-            </div>
-          </div>
-          <span class="progress-bar__text">
-            {{ progress().completed }}/{{ progress().total }}
-          </span>
         </div>
       </div>
 
       <!-- Status section -->
-      <div class="toolbar__section toolbar__section--status" *ngIf="statusText()">
-        <span class="toolbar__status"
-              [attr.aria-live]="statusLive() ? 'polite' : null"
-              [class]="'toolbar__status--' + statusType()">
-          {{ statusText() }}
-        </span>
+      <div class="toolbar__section toolbar__section--status" *ngIf="statusMessage">
+        <div class="toolbar__status" [class]="'toolbar__status--' + statusType">
+          {{ statusMessage }}
+        </div>
       </div>
     </div>
   `,
-  styleUrls: ['./toolbar.component.scss']
+  styleUrl: './toolbar.component.scss'
 })
-export class ToolbarComponent {
-  // Component inputs using the new input() function
-  actions = input<ToolbarAction[]>([]);
-  compact = input(false);
-  orientation = input<'horizontal' | 'vertical'>('horizontal');
-  ariaLabel = input('Toolbar');
-
-  // Progress tracking
-  showProgress = input(false);
-  progress = input({ completed: 0, total: 0, percentage: 0 });
-
-  // Status display
-  statusText = input('');
-  statusType = input<'info' | 'success' | 'warning' | 'error'>('info');
-  statusLive = input(false);
+export class ToolbarComponent implements OnInit, OnDestroy {
+  @Input() actions: ToolbarAction[] = [];
+  @Input() orientation: 'horizontal' | 'vertical' = 'horizontal';
+  @Input() showProgress: boolean = false;
+  @Input() progress: number = 0;
+  @Input() statusMessage: string = '';
+  @Input() statusType: 'info' | 'success' | 'warning' | 'error' = 'info';
+  @Input() showShortcuts: boolean = true;
+  @Input() responsive: boolean = true;
 
   @Output() actionTriggered = new EventEmitter<string>();
 
-  // Computed values
-  visibleActions = computed(() => {
-    return this.actions().filter(action => action.type !== 'hidden');
+  // Screen size tracking
+  private screenWidth = signal(window.innerWidth);
+  
+  // Computed properties for responsive layout
+  screenSize = computed(() => {
+    const width = this.screenWidth();
+    if (width < 480) return 'xs';
+    if (width < 768) return 'sm';
+    if (width < 1024) return 'md';
+    if (width < 1440) return 'lg';
+    return 'xl';
   });
 
-  trackByActionId(index: number, action: ToolbarAction): string {
-    return action.id;
+  optimalColumns = computed(() => {
+    if (!this.responsive) return 4;
+    
+    const size = this.screenSize();
+    const actionCount = this.visibleActions().length;
+    
+    switch (size) {
+      case 'xs': return Math.min(2, actionCount);
+      case 'sm': return Math.min(3, actionCount);
+      case 'md': return Math.min(4, actionCount);
+      case 'lg': return Math.min(6, actionCount);
+      case 'xl': return Math.min(8, actionCount);
+      default: return 4;
+    }
+  });
+
+  gridGap = computed(() => {
+    const size = this.screenSize();
+    switch (size) {
+      case 'xs': return 'var(--spacing-xs)';
+      case 'sm': return 'var(--spacing-sm)';
+      default: return 'var(--spacing-md)';
+    }
+  });
+
+  visibleActions = computed(() => {
+    return this.actions.filter((action, index) => {
+      // Always show non-separator actions
+      if (!action.separator) {
+        return action.visible !== false;
+      }
+      
+      // For separators, only show if there are visible actions after them
+      const hasVisibleAfter = this.actions
+        .slice(index + 1)
+        .some(a => !a.separator && a.visible !== false);
+      
+      return hasVisibleAfter;
+    });
+  });
+
+  // Group actions by separators and distribute across rows
+  actionGroups = computed(() => {
+    const visible = this.visibleActions();
+    const groups: ToolbarAction[][] = [];
+    let currentGroup: ToolbarAction[] = [];
+
+    for (const action of visible) {
+      if (action.separator && currentGroup.length > 0) {
+        groups.push([...currentGroup]);
+        currentGroup = [];
+      } else if (!action.separator) {
+        currentGroup.push(action);
+      }
+    }
+
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
+    }
+
+    return groups;
+  });
+
+  // Distribute actions optimally across rows
+  actionRows = computed(() => {
+    const groups = this.actionGroups();
+    const columns = this.optimalColumns();
+    const rows: ToolbarAction[][] = [];
+
+    for (const group of groups) {
+      // Calculate how many rows this group needs
+      const priorityActions = group.filter(a => a.priority && a.priority > 1);
+      const normalActions = group.filter(a => !a.priority || a.priority <= 1);
+      
+      let currentRow: ToolbarAction[] = [];
+      let currentRowWeight = 0;
+
+      // Process priority actions first (they may span multiple columns)
+      for (const action of priorityActions) {
+        const span = this.getColumnSpanValue(action);
+        
+        if (currentRowWeight + span > columns) {
+          if (currentRow.length > 0) {
+            rows.push([...currentRow]);
+            currentRow = [];
+            currentRowWeight = 0;
+          }
+        }
+        
+        currentRow.push(action);
+        currentRowWeight += span;
+      }
+
+      // Process normal actions
+      for (const action of normalActions) {
+        if (currentRowWeight >= columns) {
+          rows.push([...currentRow]);
+          currentRow = [];
+          currentRowWeight = 0;
+        }
+        
+        currentRow.push(action);
+        currentRowWeight += 1;
+      }
+
+      // Add remaining actions in current row
+      if (currentRow.length > 0) {
+        rows.push([...currentRow]);
+      }
+    }
+
+    return rows;
+  });
+
+  ngOnInit() {
+    this.updateScreenSize();
   }
 
-  onActionClick(action: ToolbarAction) {
-    if (action.disabled) return;
-
-    // Handle toggle actions
-    if (action.type === 'toggle') {
-      action.active = !action.active;
-    }
-
-    this.actionTriggered.emit(action.id);
+  ngOnDestroy() {
+    // Cleanup if needed
   }
 
-  getButtonAriaLabel(action: ToolbarAction): string {
-    let label = action.label;
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.updateScreenSize();
+  }
 
-    if (action.type === 'toggle') {
-      label += action.active ? ' (active)' : ' (inactive)';
+  private updateScreenSize() {
+    this.screenWidth.set(window.innerWidth);
+  }
+
+  handleAction(action: ToolbarAction) {
+    if (!action.disabled && !action.separator) {
+      this.actionTriggered.emit(action.id);
     }
-
-    if (action.shortcut) {
-      label += `, shortcut ${action.shortcut}`;
-    }
-
-    if (action.disabled) {
-      label += ' (disabled)';
-    }
-
-    return label;
   }
 
   getTooltip(action: ToolbarAction): string {
-    let tooltip = action.label;
-
-    if (action.shortcut) {
+    let tooltip = action.tooltip || action.label;
+    if (action.shortcut && this.showShortcuts) {
       tooltip += ` (${action.shortcut})`;
     }
-
     return tooltip;
   }
 
-  // Helper method to create common toolbar actions
+  getColumnSpan(action: ToolbarAction): string | undefined {
+    const span = this.getColumnSpanValue(action);
+    return span > 1 ? `span ${span}` : undefined;
+  }
+
+  private getColumnSpanValue(action: ToolbarAction): number {
+    if (!action.priority) return 1;
+    
+    const columns = this.optimalColumns();
+    const size = this.screenSize();
+    
+    // Priority 3+ actions can span more columns on larger screens
+    if (action.priority >= 3 && size === 'xl') return Math.min(3, columns);
+    if (action.priority >= 2 && (size === 'lg' || size === 'xl')) return Math.min(2, columns);
+    
+    return 1;
+  }
+
+  // Tracking functions for *ngFor
+  trackByRow(index: number, row: ToolbarAction[]): string {
+    return row.map(a => a.id).join('-');
+  }
+
+  trackByAction(index: number, action: ToolbarAction): string {
+    return action.id;
+  }
+
+  // Static factory methods for creating common toolbar configurations
   static createDefaultActions(): ToolbarAction[] {
     return [
       {
         id: 'new-project',
         label: 'New Project',
         icon: '📁',
+        tooltip: 'Create a new annotation project',
+        priority: 2,
         shortcut: 'Ctrl+N'
       },
       {
         id: 'open-project',
         label: 'Open Project',
         icon: '📂',
+        tooltip: 'Open an existing project',
         shortcut: 'Ctrl+O'
       },
-      { id: 'separator-1', label: '', icon: '', type: 'separator' },
-      {
-        id: 'upload-images',
-        label: 'Upload Images',
-        icon: '📷',
-        shortcut: 'Ctrl+U'
-      },
-      { id: 'separator-2', label: '', icon: '', type: 'separator' },
       {
         id: 'save-project',
         label: 'Save Project',
         icon: '💾',
+        tooltip: 'Save the current project',
         shortcut: 'Ctrl+S'
       },
-      { id: 'separator-3', label: '', icon: '', type: 'separator' },
       {
-        id: 'undo',
-        label: 'Undo',
-        icon: '↶',
-        shortcut: 'Ctrl+Z'
+        id: 'separator-1',
+        label: '',
+        separator: true
       },
       {
-        id: 'redo',
-        label: 'Redo',
-        icon: '↷',
-        shortcut: 'Ctrl+Y'
+        id: 'upload-images',
+        label: 'Upload Images',
+        icon: '🖼️',
+        tooltip: 'Upload images to annotate',
+        priority: 2
       },
-      { id: 'separator-4', label: '', icon: '', type: 'separator' },
+      {
+        id: 'export-annotations',
+        label: 'Export',
+        icon: '📤',
+        tooltip: 'Export annotations in YOLO format',
+        shortcut: 'Ctrl+E'
+      }
+    ];
+  }
+
+  static createAnnotationActions(): ToolbarAction[] {
+    return [
+      {
+        id: 'separator-2',
+        label: '',
+        separator: true
+      },
+      {
+        id: 'select-tool',
+        label: 'Select',
+        icon: '👆',
+        tooltip: 'Select and move annotations',
+        shortcut: 'V'
+      },
+      {
+        id: 'bbox-tool',
+        label: 'Bounding Box',
+        icon: '⬛',
+        tooltip: 'Draw bounding boxes',
+        priority: 2,
+        shortcut: 'B'
+      },
+      {
+        id: 'delete-selected',
+        label: 'Delete',
+        icon: '🗑️',
+        tooltip: 'Delete selected annotation',
+        shortcut: 'Delete'
+      },
+      {
+        id: 'separator-3',
+        label: '',
+        separator: true
+      },
       {
         id: 'zoom-in',
         label: 'Zoom In',
         icon: '🔍+',
+        tooltip: 'Zoom in on the image',
         shortcut: '+'
       },
       {
         id: 'zoom-out',
         label: 'Zoom Out',
         icon: '🔍-',
+        tooltip: 'Zoom out of the image',
         shortcut: '-'
       },
       {
-        id: 'zoom-reset',
-        label: 'Reset Zoom',
-        icon: '⊙',
-        shortcut: '0'
-      },
-      { id: 'separator-3', label: '', icon: '', type: 'separator' },
-      {
-        id: 'show-labels',
-        label: 'Show Labels',
-        icon: '🏷️',
-        type: 'toggle',
-        active: true,
-        shortcut: 'L'
+        id: 'zoom-fit',
+        label: 'Fit to Screen',
+        icon: '🖼️',
+        tooltip: 'Fit image to screen',
+        shortcut: 'F'
       },
       {
-        id: 'show-grid',
-        label: 'Show Grid',
-        icon: '⊞',
-        type: 'toggle',
-        active: false,
-        shortcut: 'G'
+        id: 'separator-4',
+        label: '',
+        separator: true
       },
-      { id: 'separator-4', label: '', icon: '', type: 'separator' },
-      {
-        id: 'export',
-        label: 'Export YOLO',
-        icon: '📤',
-        shortcut: 'Ctrl+E'
-      }
-    ];
-  }
-
-  // Helper method to create annotation-specific actions
-  static createAnnotationActions(): ToolbarAction[] {
-    return [
-      {
-        id: 'select-tool',
-        label: 'Select Tool',
-        icon: '👆',
-        type: 'toggle',
-        active: true,
-        shortcut: 'V',
-        group: 'tools'
-      },
-      {
-        id: 'draw-tool',
-        label: 'Draw Tool',
-        icon: '⬚',
-        type: 'toggle',
-        active: false,
-        shortcut: 'D',
-        group: 'tools'
-      },
-      {
-        id: 'pan-tool',
-        label: 'Pan Tool',
-        icon: '✋',
-        type: 'toggle',
-        active: false,
-        shortcut: 'H',
-        group: 'tools'
-      },
-      { id: 'separator-tools', label: '', icon: '', type: 'separator' },
       {
         id: 'prev-image',
-        label: 'Previous Image',
+        label: 'Previous',
         icon: '⬅️',
-        shortcut: 'A'
+        tooltip: 'Go to previous image',
+        shortcut: '←'
       },
       {
         id: 'next-image',
-        label: 'Next Image',
+        label: 'Next',
         icon: '➡️',
-        shortcut: 'D'
-      },
-      {
-        id: 'mark-complete',
-        label: 'Mark Complete',
-        icon: '✅',
-        shortcut: 'Space'
+        tooltip: 'Go to next image',
+        shortcut: '→'
       }
     ];
   }

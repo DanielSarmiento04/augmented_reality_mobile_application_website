@@ -20,8 +20,8 @@
     <custom-toolbar
       [actions]="toolbarActions()"
       [showProgress]="true"
-      [progress]="projectProgress()"
-      [statusText]="statusMessage()"
+      [progress]="projectProgress().percentage"
+      [statusMessage]="statusMessage()"
       [statusType]="statusType()"
       (actionTriggered)="onToolbarAction($event)">
     </custom-toolbar>
