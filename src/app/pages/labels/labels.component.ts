@@ -442,32 +442,42 @@ export class LabelsComponent implements OnInit, OnDestroy {
         return;
       }
 
+      console.log(`Processing image file: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
+
       // Create FileReader to read the image
       const reader = new FileReader();
       reader.onload = (e) => {
+        const result = e.target?.result as string;
+        if (!result) {
+          console.warn(`Failed to read file content: ${file.name}`);
+          resolve(null);
+          return;
+        }
+
         const img = new Image();
         img.onload = () => {
           const imageAnnotation: ImageAnnotation = {
             id: crypto.randomUUID(),
             filename: file.name,
-            path: '', // Will be set when saved
-            url: e.target?.result as string, // Base64 data URL
+            path: '', // Will be set when saved to server
+            url: result, // Base64 data URL for immediate display
             width: img.width,
             height: img.height,
             boundingBoxes: [],
             isCompleted: false,
             lastModified: new Date()
           };
+          console.log(`Successfully processed image: ${file.name} (${img.width}x${img.height})`);
           resolve(imageAnnotation);
         };
-        img.onerror = () => {
-          console.warn(`Failed to load image: ${file.name}`);
+        img.onerror = (error) => {
+          console.error(`Failed to load image: ${file.name}`, error);
           resolve(null);
         };
-        img.src = e.target?.result as string;
+        img.src = result;
       };
-      reader.onerror = () => {
-        console.warn(`Failed to read file: ${file.name}`);
+      reader.onerror = (error) => {
+        console.error(`Failed to read file: ${file.name}`, error);
         resolve(null);
       };
       reader.readAsDataURL(file);

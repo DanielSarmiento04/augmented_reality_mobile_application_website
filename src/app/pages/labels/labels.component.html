@@ -61,7 +61,7 @@
               (keydown.space)="selectImage(i); $event.preventDefault()">
 
               <div class="image-item__thumbnail">
-                <img [src]="image.path" [alt]="image.filename" loading="lazy">
+`                <img [src]="image.url || image.path" [alt]="image.filename" loading="lazy">
               </div>
 
               <div class="image-item__info">

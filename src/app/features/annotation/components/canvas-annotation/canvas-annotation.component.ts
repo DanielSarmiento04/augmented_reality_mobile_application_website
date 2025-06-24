@@ -265,7 +265,11 @@ export class CanvasAnnotationComponent implements OnInit, OnDestroy {
       this.updateCanvasSize();
       this.redraw();
     };
-    this.imageElement.src = annotation.path;
+    this.imageElement.onerror = (error) => {
+      console.error('Failed to load image:', annotation.filename, error);
+    };
+    // Use url (base64 data URL) if available, otherwise fall back to path
+    this.imageElement.src = annotation.url || annotation.path;
   }
 
   private updateCanvasSize() {

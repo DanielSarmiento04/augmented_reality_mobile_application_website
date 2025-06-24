@@ -18,12 +18,12 @@ export interface ToolbarAction {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="toolbar" 
+    <div class="toolbar"
          [attr.aria-orientation]="orientation"
          [style.--toolbar-columns]="optimalColumns()"
          [style.--toolbar-gap]="gridGap()"
          role="toolbar">
-      
+
       <!-- Progress section for loading states -->
       <div class="toolbar__section toolbar__section--progress" *ngIf="showProgress">
         <div class="toolbar__progress">
@@ -49,13 +49,13 @@ export interface ToolbarAction {
             (click)="handleAction(action)"
             (keydown.enter)="handleAction(action)"
             (keydown.space)="handleAction(action)">
-            
+
             <!-- Icon if provided -->
             <span class="toolbar__button-icon" *ngIf="action.icon" [innerHTML]="action.icon"></span>
-            
+
             <!-- Label -->
             <span class="toolbar__button-label">{{ action.label }}</span>
-            
+
             <!-- Keyboard shortcut hint -->
             <span class="toolbar__button-shortcut" *ngIf="action.shortcut && showShortcuts">
               {{ action.shortcut }}
@@ -88,7 +88,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   // Screen size tracking
   private screenWidth = signal(window.innerWidth);
-  
+
   // Computed properties for responsive layout
   screenSize = computed(() => {
     const width = this.screenWidth();
@@ -101,10 +101,10 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   optimalColumns = computed(() => {
     if (!this.responsive) return 4;
-    
+
     const size = this.screenSize();
     const actionCount = this.visibleActions().length;
-    
+
     switch (size) {
       case 'xs': return Math.min(2, actionCount);
       case 'sm': return Math.min(3, actionCount);
@@ -130,12 +130,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       if (!action.separator) {
         return action.visible !== false;
       }
-      
+
       // For separators, only show if there are visible actions after them
       const hasVisibleAfter = this.actions
         .slice(index + 1)
         .some(a => !a.separator && a.visible !== false);
-      
+
       return hasVisibleAfter;
     });
   });
@@ -172,14 +172,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       // Calculate how many rows this group needs
       const priorityActions = group.filter(a => a.priority && a.priority > 1);
       const normalActions = group.filter(a => !a.priority || a.priority <= 1);
-      
+
       let currentRow: ToolbarAction[] = [];
       let currentRowWeight = 0;
 
       // Process priority actions first (they may span multiple columns)
       for (const action of priorityActions) {
         const span = this.getColumnSpanValue(action);
-        
+
         if (currentRowWeight + span > columns) {
           if (currentRow.length > 0) {
             rows.push([...currentRow]);
@@ -187,7 +187,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
             currentRowWeight = 0;
           }
         }
-        
+
         currentRow.push(action);
         currentRowWeight += span;
       }
@@ -199,7 +199,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           currentRow = [];
           currentRowWeight = 0;
         }
-        
+
         currentRow.push(action);
         currentRowWeight += 1;
       }
@@ -251,14 +251,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   private getColumnSpanValue(action: ToolbarAction): number {
     if (!action.priority) return 1;
-    
+
     const columns = this.optimalColumns();
     const size = this.screenSize();
-    
+
     // Priority 3+ actions can span more columns on larger screens
     if (action.priority >= 3 && size === 'xl') return Math.min(3, columns);
     if (action.priority >= 2 && (size === 'lg' || size === 'xl')) return Math.min(2, columns);
-    
+
     return 1;
   }
 
