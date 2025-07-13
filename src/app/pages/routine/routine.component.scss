@@ -707,7 +707,7 @@
   &::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: var(--border-radius-sm);
-    
+
     &:hover {
       background: var(--text-secondary);
     }
@@ -737,7 +737,7 @@
   &::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: var(--border-radius-sm);
-    
+
     &:hover {
       background: var(--text-secondary);
     }
@@ -746,9 +746,9 @@
   /* Firefox scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) var(--surface-secondary);
-  
+
   position: relative;
-  
+
   &::before {
     content: '';
     position: sticky;
@@ -766,7 +766,7 @@
     opacity: 0;
     transition: opacity var(--transition-normal);
   }
-  
+
   &.scrolled::before {
     opacity: 1;
   }
@@ -1005,7 +1005,7 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -1022,7 +1022,7 @@
     transform: translateX(-100%) translateY(-100%);
     transition: transform var(--transition-normal);
   }
-  
+
   &:hover::before {
     transform: translateX(0) translateY(0);
   }
@@ -1062,7 +1062,7 @@
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-3);
-  
+
   /* Custom scrollbar for checklist */
   &::-webkit-scrollbar {
     width: 6px;
@@ -1076,7 +1076,7 @@
   &::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: var(--border-radius-sm);
-    
+
     &:hover {
       background: var(--text-secondary);
     }
@@ -1347,10 +1347,10 @@
 
   .modal-footer {
     padding: var(--spacing-4);
-    
+
     .btn {
       flex: 1;
-      
+
       &:last-child {
         margin-left: var(--spacing-2);
       }
@@ -1383,7 +1383,7 @@
 // === LOADING STATE FOR MODAL ===
 .modal-loading {
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -1403,7 +1403,7 @@
 // === SCROLL INDICATOR ===
 .modal-form {
   position: relative;
-  
+
   &::before {
     content: '';
     position: sticky;
@@ -1421,7 +1421,7 @@
     opacity: 0;
     transition: opacity var(--transition-normal);
   }
-  
+
   &.scrolled::before {
     opacity: 1;
   }
@@ -1449,7 +1449,7 @@
 @media (prefers-color-scheme: dark) {
   .modal-overlay {
     background: rgba(0, 0, 0, 0.85);
-    
+
     &.danger {
       background: rgba(239, 68, 68, 0.2);
     }

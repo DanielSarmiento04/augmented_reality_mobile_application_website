@@ -394,7 +394,7 @@ export class RoutineComponent implements OnInit {
     const target = event.target as HTMLElement;
     const scrollTop = target.scrollTop;
     const modalForm = target.closest('.modal-form');
-    
+
     if (modalForm) {
       if (scrollTop > 10) {
         modalForm.classList.add('scrolled');
