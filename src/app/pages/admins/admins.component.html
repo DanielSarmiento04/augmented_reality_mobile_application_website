@@ -9,9 +9,9 @@
         </h1>
         <p class="page-subtitle">Administra los usuarios del sistema AR</p>
       </div>
-      
+
       <div class="header-actions">
-        <button 
+        <button
           class="btn btn--primary btn--lg"
           (click)="openCreateModal()"
           [disabled]="isLoading"
@@ -28,20 +28,21 @@
     <div class="search-container">
       <div class="search-wrapper">
         <i class="icon-search"></i>
-        <input 
-          type="text" 
+        <input
+          type="text"
           class="search-input"
           placeholder="Buscar por nombre, email o rol..."
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
         />
-        <button 
-          *ngIf="searchTerm" 
-          class="clear-search"
-          (click)="searchTerm = ''; onSearch()"
-        >
-          <i class="icon-x"></i>
-        </button>
+        @if (searchTerm) {
+          <button
+            class="clear-search"
+            (click)="searchTerm = ''; onSearch()"
+          >
+            <i class="icon-x"></i>
+          </button>
+        }
       </div>
     </div>
 
@@ -67,136 +68,145 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            *ngFor="let user of paginatedUsers; trackBy: trackByUserId"
-            class="user-row"
-            [class.admin-user]="user.role === 'admin'"
-          >
-            <td class="user-info">
-              <div class="user-avatar">
-                <span>{{ user.username.charAt(0).toUpperCase() }}</span>
-              </div>
-              <div class="user-details">
-                <span class="username">{{ user.username }}</span>
-                <span class="user-id">#{{ user.id }}</span>
-              </div>
-            </td>
-            
-            <td class="email-cell">
-              <span class="email">{{ user.email }}</span>
-            </td>
-            
-            <td class="role-cell">
-              <span class="badge" [class]="getRoleClass(user.role)">
-                <span class="role-icon">{{ getRoleIcon(user.role) }}</span>
-                {{ user.role | titlecase }}
-              </span>
-            </td>
-            
-            <td class="date-cell">
-              <span class="date">{{ formatDate(user.createdAt) }}</span>
-            </td>
-            
-            <td class="date-cell">
-              <span class="date">{{ formatDate(user.updatedAt) }}</span>
-            </td>
-            
-            <td class="actions-cell">
-              <div class="action-buttons">
-                <button 
-                  class="btn btn--ghost btn--sm action-btn"
-                  (click)="openEditModal(user)"
-                  [disabled]="isLoading || user.role === 'admin'"
-                  title="Editar usuario"
-                >
-                  <i class="icon-edit"></i>
-                </button>
-                
-                <button 
-                  class="btn btn--ghost btn--sm action-btn delete-btn"
-                  (click)="confirmDelete(user)"
-                  [disabled]="isLoading || user.role === 'admin'"
-                  title="Eliminar usuario"
-                >
-                  <i class="icon-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          
+          @for (user of paginatedUsers; track trackByUserId($index, user)) {
+            <tr
+              class="user-row"
+              [class.admin-user]="user.role === 'admin'"
+            >
+              <td class="user-info">
+                <div class="user-avatar">
+                  <span>{{ user.username.charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="user-details">
+                  <span class="username">{{ user.username }}</span>
+                  <span class="user-id">#{{ user.id }}</span>
+                </div>
+              </td>
+
+              <td class="email-cell">
+                <span class="email">{{ user.email }}</span>
+              </td>
+
+              <td class="role-cell">
+                <span class="badge" [class]="getRoleClass(user.role)">
+                  <span class="role-icon">{{ getRoleIcon(user.role) }}</span>
+                  {{ user.role | titlecase }}
+                </span>
+              </td>
+
+              <td class="date-cell">
+                <span class="date">{{ formatDate(user.createdAt) }}</span>
+              </td>
+
+              <td class="date-cell">
+                <span class="date">{{ formatDate(user.updatedAt) }}</span>
+              </td>
+
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button
+                    class="btn btn--ghost btn--sm action-btn"
+                    (click)="openEditModal(user)"
+                    [disabled]="isLoading || user.role === 'admin'"
+                    title="Editar usuario"
+                  >
+                    <i class="icon-edit"></i>
+                  </button>
+
+                  <button
+                    class="btn btn--ghost btn--sm action-btn delete-btn"
+                    (click)="confirmDelete(user)"
+                    [disabled]="isLoading || user.role === 'admin'"
+                    title="Eliminar usuario"
+                  >
+                    <i class="icon-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
           <!-- Empty State -->
-          <tr *ngIf="!isLoading && paginatedUsers.length === 0" class="empty-row">
-            <td colspan="6" class="empty-cell">
-              <div class="empty-state">
-                <i class="icon-users-empty"></i>
-                <h3>No se encontraron usuarios</h3>
-                <p>{{ searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer usuario' }}</p>
-              </div>
-            </td>
-          </tr>
+          @if (!isLoading && paginatedUsers.length === 0) {
+            <tr class="empty-row">
+              <td colspan="6" class="empty-cell">
+                <div class="empty-state">
+                  <i class="icon-users-empty"></i>
+                  <h3>No se encontraron usuarios</h3>
+                  <p>{{ searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza creando tu primer usuario' }}</p>
+                </div>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay" *ngIf="isLoading">
-      <div class="loading-spinner-large"></div>
-      <span>Cargando usuarios...</span>
-    </div>
+    @if (isLoading) {
+      <div class="loading-overlay">
+        <div class="loading-spinner-large"></div>
+        <span>Cargando usuarios...</span>
+      </div>
+    }
   </div>
 
   <!-- Pagination -->
-  <div class="pagination-container" *ngIf="totalPages > 1 && !isLoading">
-    <div class="pagination">
-      <button 
-        class="btn btn--ghost pagination-btn"
-        (click)="changePage(currentPage - 1)"
-        [disabled]="currentPage === 1"
-      >
-        <i class="icon-chevron-left"></i>
-        Anterior
-      </button>
-      
-      <div class="page-numbers">
-        <button 
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          class="page-number"
-          [class.active]="currentPage === i + 1"
-          (click)="changePage(i + 1)"
+  @if (totalPages > 1 && !isLoading) {
+    <div class="pagination-container">
+      <div class="pagination">
+        <button
+          class="btn btn--ghost pagination-btn"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
         >
-          {{ i + 1 }}
+          <i class="icon-chevron-left"></i>
+          Anterior
+        </button>
+
+        <div class="page-numbers">
+          @for (page of [].constructor(totalPages); track $index) {
+            <button
+              class="page-number"
+              [class.active]="currentPage === $index + 1"
+              (click)="changePage($index + 1)"
+            >
+              {{ $index + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          class="btn btn--ghost pagination-btn"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          Siguiente
+          <i class="icon-chevron-right"></i>
         </button>
       </div>
-      
-      <button 
-        class="btn btn--ghost pagination-btn"
-        (click)="changePage(currentPage + 1)"
-        [disabled]="currentPage === totalPages"
-      >
-        Siguiente
-        <i class="icon-chevron-right"></i>
-      </button>
+
+      <div class="pagination-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </div>
     </div>
-    
-    <div class="pagination-info">
-      Página {{ currentPage }} de {{ totalPages }}
-    </div>
-  </div>
+  }
 </div>
 
 <!-- User Modal -->
-<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title">
-        <i [class]="isEditMode ? 'icon-edit' : 'icon-plus'"></i>
-        {{ isEditMode ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}
-      </h2>
-      <button class="btn btn--ghost btn--sm close-btn" (click)="closeModal()">
-        <i class="icon-x"></i>
-      </button>
-    </div>
-    
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i [class]="isEditMode ? 'icon-edit' : 'icon-plus'"></i>
+          {{ isEditMode ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}
+        </h2>
+        <button class="btn btn--ghost btn--sm close-btn" (click)="closeModal()">
+          <i class="icon-x"></i>
+        </button>
+      </div>
+
     <div class="modal-body">
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
         <div class="form-row">
@@ -205,18 +215,24 @@
               <i class="icon-user"></i>
               Nombre de Usuario
             </label>
-            <input 
-              type="text" 
-              id="username" 
+            <input
+              type="text"
+              id="username"
               formControlName="username"
               class="form-input"
               [class.error]="userForm.get('username')?.errors && userForm.get('username')?.touched"
               placeholder="Ingresa el nombre de usuario"
             />
-            <div class="form-error" *ngIf="userForm.get('username')?.errors && userForm.get('username')?.touched">
-              <span *ngIf="userForm.get('username')?.errors?.['required']">El nombre de usuario es requerido</span>
-              <span *ngIf="userForm.get('username')?.errors?.['minlength']">Mínimo 3 caracteres</span>
-            </div>
+            @if (userForm.get('username')?.errors && userForm.get('username')?.touched) {
+              <div class="form-error">
+                @if (userForm.get('username')?.errors?.['required']) {
+                  <span>El nombre de usuario es requerido</span>
+                }
+                @if (userForm.get('username')?.errors?.['minlength']) {
+                  <span>Mínimo 3 caracteres</span>
+                }
+              </div>
+            }
           </div>
         </div>
 
@@ -226,18 +242,24 @@
               <i class="icon-mail"></i>
               Correo Electrónico
             </label>
-            <input 
-              type="email" 
-              id="email" 
+            <input
+              type="email"
+              id="email"
               formControlName="email"
               class="form-input"
               [class.error]="userForm.get('email')?.errors && userForm.get('email')?.touched"
               placeholder="usuario@ejemplo.com"
             />
-            <div class="form-error" *ngIf="userForm.get('email')?.errors && userForm.get('email')?.touched">
-              <span *ngIf="userForm.get('email')?.errors?.['required']">El email es requerido</span>
-              <span *ngIf="userForm.get('email')?.errors?.['email']">Formato de email inválido</span>
-            </div>
+            @if (userForm.get('email')?.errors && userForm.get('email')?.touched) {
+              <div class="form-error">
+                @if (userForm.get('email')?.errors?.['required']) {
+                  <span>El email es requerido</span>
+                }
+                @if (userForm.get('email')?.errors?.['email']) {
+                  <span>Formato de email inválido</span>
+                }
+              </div>
+            }
           </div>
         </div>
 
@@ -247,18 +269,24 @@
               <i class="icon-lock"></i>
               {{ isEditMode ? 'Nueva Contraseña (opcional)' : 'Contraseña' }}
             </label>
-            <input 
-              type="password" 
-              id="password" 
+            <input
+              type="password"
+              id="password"
               formControlName="password"
               class="form-input"
               [class.error]="userForm.get('password')?.errors && userForm.get('password')?.touched"
               [placeholder]="isEditMode ? 'Dejar vacío para mantener actual' : 'Mínimo 6 caracteres'"
             />
-            <div class="form-error" *ngIf="userForm.get('password')?.errors && userForm.get('password')?.touched">
-              <span *ngIf="userForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
-              <span *ngIf="userForm.get('password')?.errors?.['minlength']">Mínimo 6 caracteres</span>
-            </div>
+            @if (userForm.get('password')?.errors && userForm.get('password')?.touched) {
+              <div class="form-error">
+                @if (userForm.get('password')?.errors?.['required']) {
+                  <span>La contraseña es requerida</span>
+                }
+                @if (userForm.get('password')?.errors?.['minlength']) {
+                  <span>Mínimo 6 caracteres</span>
+                }
+              </div>
+            }
           </div>
         </div>
 
@@ -268,17 +296,16 @@
               <i class="icon-shield"></i>
               Rol del Usuario
             </label>
-            <select 
-              id="role" 
+            <select
+              id="role"
               formControlName="role"
               class="form-select"
             >
-              <option 
-                *ngFor="let role of availableRoles" 
-                [value]="role"
-              >
-                {{ getRoleIcon(role) }} {{ role | titlecase }}
-              </option>
+              @for (role of availableRoles; track role) {
+                <option [value]="role">
+                  {{ getRoleIcon(role) }} {{ role | titlecase }}
+                </option>
+              }
             </select>
             <div class="form-help">
               Los administradores no pueden crear otros administradores
@@ -287,89 +314,98 @@
         </div>
       </form>
     </div>
-    
+
     <div class="modal-footer">
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn btn--outline"
         (click)="closeModal()"
         [disabled]="isLoading"
       >
         Cancelar
       </button>
-      
-      <button 
-        type="submit" 
+
+      <button
+        type="submit"
         class="btn btn--primary"
         (click)="onSubmit()"
         [disabled]="userForm.invalid || isLoading"
         [class.loading]="isLoading"
       >
-        <span *ngIf="!isLoading">
-          <i [class]="isEditMode ? 'icon-save' : 'icon-plus'"></i>
-          {{ isEditMode ? 'Actualizar' : 'Crear' }} Usuario
-        </span>
-        <span *ngIf="isLoading" class="btn-loading">
-          <div class="loading-spinner"></div>
-          {{ isEditMode ? 'Actualizando...' : 'Creando...' }}
-        </span>
+        @if (!isLoading) {
+          <span>
+            <i [class]="isEditMode ? 'icon-save' : 'icon-plus'"></i>
+            {{ isEditMode ? 'Actualizar' : 'Crear' }} Usuario
+          </span>
+        } @else {
+          <span class="btn-loading">
+            <div class="loading-spinner"></div>
+            {{ isEditMode ? 'Actualizando...' : 'Creando...' }}
+          </span>
+        }
       </button>
     </div>
+    </div>
   </div>
-</div>
+}
 
 <!-- Delete Confirmation Modal -->
-<div class="modal-overlay danger" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
-  <div class="modal modal--danger" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title">
-        <i class="icon-alert-triangle"></i>
-        Confirmar Eliminación
-      </h2>
-    </div>
-    
-    <div class="modal-body">
-      <div class="danger-content">
-        <div class="danger-icon">
-          <i class="icon-trash-large"></i>
-        </div>
-        <div class="danger-text">
-          <h3>¿Estás seguro que deseas eliminar este usuario?</h3>
-          <p><strong>{{ userToDelete?.username }}</strong> ({{ userToDelete?.email }})</p>
-          <div class="warning-message">
-            <i class="icon-warning"></i>
-            Esta acción no se puede deshacer
+@if (showDeleteConfirm) {
+  <div class="modal-overlay danger" (click)="cancelDelete()">
+    <div class="modal modal--danger" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="icon-alert-triangle"></i>
+          Confirmar Eliminación
+        </h2>
+      </div>
+
+      <div class="modal-body">
+        <div class="danger-content">
+          <div class="danger-icon">
+            <i class="icon-trash-large"></i>
+          </div>
+          <div class="danger-text">
+            <h3>¿Estás seguro que deseas eliminar este usuario?</h3>
+            <p><strong>{{ userToDelete?.username }}</strong> ({{ userToDelete?.email }})</p>
+            <div class="warning-message">
+              <i class="icon-warning"></i>
+              Esta acción no se puede deshacer
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <div class="modal-footer">
-      <button 
-        type="button" 
-        class="btn btn--outline"
-        (click)="cancelDelete()"
-        [disabled]="isLoading"
-      >
-        Cancelar
-      </button>
-      
-      <button 
-        type="button" 
-        class="btn btn--danger"
-        (click)="deleteUser()"
-        [disabled]="isLoading"
-        [class.loading]="isLoading"
-      >
-        <span *ngIf="!isLoading">
-          <i class="icon-trash"></i>
-          Eliminar Usuario
-        </span>
-        <span *ngIf="isLoading" class="btn-loading">
-          <div class="loading-spinner"></div>
-          Eliminando...
-        </span>
-      </button>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn--outline"
+          (click)="cancelDelete()"
+          [disabled]="isLoading"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--danger"
+          (click)="deleteUser()"
+          [disabled]="isLoading"
+          [class.loading]="isLoading"
+        >
+          @if (!isLoading) {
+            <span>
+              <i class="icon-trash"></i>
+              Eliminar Usuario
+            </span>
+          } @else {
+            <span class="btn-loading">
+              <div class="loading-spinner"></div>
+              Eliminando...
+            </span>
+          }
+        </button>
+      </div>
     </div>
   </div>
-</div>
+}

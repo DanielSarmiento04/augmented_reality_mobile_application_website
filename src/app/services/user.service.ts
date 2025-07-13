@@ -95,7 +95,7 @@ export class UserService {
     };
 
     this.users.push(newUser);
-    
+
     return of(newUser).pipe(delay(1000));
   }
 
@@ -104,7 +104,7 @@ export class UserService {
    */
   updateUser(id: string, userData: Partial<User>): Observable<User> {
     const userIndex = this.users.findIndex(u => u.id === id);
-    
+
     if (userIndex === -1) {
       return throwError(() => new Error('User not found'));
     }
@@ -127,7 +127,7 @@ export class UserService {
     };
 
     this.users[userIndex] = updatedUser;
-    
+
     return of(updatedUser).pipe(delay(1000));
   }
 
@@ -136,7 +136,7 @@ export class UserService {
    */
   deleteUser(id: string): Observable<boolean> {
     const userIndex = this.users.findIndex(u => u.id === id);
-    
+
     if (userIndex === -1) {
       return throwError(() => new Error('User not found'));
     }
@@ -147,7 +147,7 @@ export class UserService {
     }
 
     this.users.splice(userIndex, 1);
-    
+
     return of(true).pipe(delay(500));
   }
 
@@ -155,12 +155,12 @@ export class UserService {
    * Search users
    */
   searchUsers(searchTerm: string): Observable<User[]> {
-    const filteredUsers = this.users.filter(user => 
+    const filteredUsers = this.users.filter(user =>
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     return of(filteredUsers).pipe(delay(500));
   }
 
@@ -182,7 +182,7 @@ export class UserService {
       users: this.users.filter(u => u.role === 'user').length,
       guests: this.users.filter(u => u.role === 'guest').length
     };
-    
+
     return of(stats).pipe(delay(300));
   }
 
@@ -193,12 +193,12 @@ export class UserService {
     // In a real app, you would hash the password and compare
     // This is just for demo purposes
     const user = this.users.find(u => u.email === email);
-    
+
     if (user) {
       // Simulate password validation
       return of(user).pipe(delay(1000));
     }
-    
+
     return of(null).pipe(delay(1000));
   }
 }

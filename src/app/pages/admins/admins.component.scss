@@ -72,7 +72,7 @@
 .header-actions {
   display: flex;
   gap: var(--spacing-3);
-  
+
   @media (max-width: 768px) {
     width: 100%;
     justify-content: flex-end;
@@ -226,7 +226,7 @@
 
   &.admin-user {
     background: linear-gradient(90deg, var(--brand-primary-50) 0%, transparent 20%);
-    
+
     &:hover {
       background: linear-gradient(90deg, var(--brand-primary-100) 0%, var(--surface-color) 20%);
     }
