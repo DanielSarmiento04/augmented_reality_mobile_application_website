@@ -512,7 +512,7 @@
       cursor: not-allowed;
     }
   }
-  
+
   // Fallback for missing icons
   &:empty::after {
     content: "⚪";
@@ -1012,6 +1012,59 @@
   margin-right: var(--spacing-2);
 }
 
+// === BUTTON LOADING AND DANGER STYLES ===
+.btn {
+  // ...existing code...
+
+  &--outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+
+    &:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-secondary);
+    }
+  }
+
+  &--danger {
+    background: var(--error);
+    color: white;
+    border: 1px solid var(--error);
+
+    &:hover {
+      background: var(--error-dark);
+      border-color: var(--error-dark);
+    }
+
+    &.loading {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // === ICON CLASSES ===
 [class^="icon-"] {
   font-style: normal;
@@ -1019,7 +1072,7 @@
   text-rendering: auto;
   line-height: 1;
   display: inline-block;
-  
+
   &::before {
     display: inline-block;
     font-size: 1em;
