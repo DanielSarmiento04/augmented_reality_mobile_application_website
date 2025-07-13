@@ -972,6 +972,29 @@ input, textarea, select {
       background: var(--brand-primary-50);
     }
   }
+
+  &--danger {
+    background: var(--error);
+    color: white;
+
+    &:hover {
+      background: var(--error-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+
+  &--icon {
+    padding: var(--spacing-2);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-radius-md);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+  }
 }
 
 // === CARDS ===

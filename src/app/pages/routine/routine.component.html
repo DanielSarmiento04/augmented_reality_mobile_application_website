@@ -129,15 +129,15 @@
               </td>
               <td>
                 <span class="status-badge" [class]="getStatusClass(routine.status)">
-                  {{ routine.status === 'draft' ? 'Borrador' : 
-                     routine.status === 'active' ? 'Activo' : 
+                  {{ routine.status === 'draft' ? 'Borrador' :
+                     routine.status === 'active' ? 'Activo' :
                      routine.status === 'completed' ? 'Completado' : 'Archivado' }}
                 </span>
               </td>
               <td>
                 <span class="priority-badge" [class]="getPriorityClass(routine.priority)">
-                  {{ routine.priority === 'low' ? 'Baja' : 
-                     routine.priority === 'medium' ? 'Media' : 
+                  {{ routine.priority === 'low' ? 'Baja' :
+                     routine.priority === 'medium' ? 'Media' :
                      routine.priority === 'high' ? 'Alta' : 'Urgente' }}
                 </span>
               </td>
@@ -166,14 +166,14 @@
               <td class="actions-cell">
                 <div class="action-buttons">
                   <button
-                    class="btn btn--sm btn--secondary"
+                    class="btn btn--ghost btn--sm action-btn"
                     (click)="openEditModal(routine)"
                     title="Editar rutina"
                   >
                     <i class="icon-edit"></i>
                   </button>
                   <button
-                    class="btn btn--sm btn--danger"
+                    class="btn btn--ghost btn--sm action-btn delete-btn"
                     (click)="openDeleteModal(routine)"
                     title="Eliminar rutina"
                   >
@@ -208,7 +208,7 @@
           >
             <i class="icon-chevron-left"></i>
           </button>
-          
+
           @for (page of [].constructor(totalPages); track $index; let i = $index) {
             <button
               class="pagination-btn"
@@ -218,7 +218,7 @@
               {{ i + 1 }}
             </button>
           }
-          
+
           <button
             class="pagination-btn"
             [disabled]="currentPage === totalPages"
@@ -249,7 +249,7 @@
       <form [formGroup]="routineForm" class="modal-form">
         <div class="form-section">
           <h3 class="section-title">Información Básica</h3>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label for="name" class="form-label">Nombre de la Rutina *</label>
@@ -345,7 +345,7 @@
 
         <div class="form-section">
           <h3 class="section-title">Pasos de la Rutina</h3>
-          
+
           <div formArrayName="steps" class="steps-container">
             @for (stepControl of stepsArray.controls; track $index; let i = $index) {
               <div [formGroupName]="i" class="step-item">
@@ -383,7 +383,7 @@
 
         <div class="form-section">
           <h3 class="section-title">Archivos de Modelos</h3>
-          
+
           <div class="form-row form-row--half">
             <div class="form-group">
               <label for="model3d" class="form-label">Modelo 3D (GLB)</label>
@@ -441,7 +441,7 @@
 
         <div class="form-section">
           <h3 class="section-title">Usuarios Asignados</h3>
-          
+
           <div class="form-group">
             <label class="form-label">Seleccionar Usuarios</label>
             <div class="users-checklist">

@@ -22,7 +22,7 @@ export class RoutineComponent implements OnInit {
   searchTerm = '';
   selectedStatusFilter = 'all';
   selectedPriorityFilter = 'all';
-  
+
   // Modal and form states
   isCreateModalOpen = false;
   isEditModalOpen = false;
@@ -260,7 +260,7 @@ export class RoutineComponent implements OnInit {
     if (this.routineForm.valid) {
       this.isLoading = true;
       const formValue = this.routineForm.value;
-      
+
       const newRoutine: Omit<Routine, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'executionCount' | 'lastExecuted'> = {
         name: formValue.name,
         description: formValue.description,
@@ -293,7 +293,7 @@ export class RoutineComponent implements OnInit {
     if (this.routineForm.valid && this.selectedRoutine) {
       this.isLoading = true;
       const formValue = this.routineForm.value;
-      
+
       const updatedRoutine: Partial<Routine> = {
         name: formValue.name,
         description: formValue.description,
