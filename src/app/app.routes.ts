@@ -2,11 +2,13 @@ import { Routes } from "@angular/router";
 import { LoginComponent } from "./pages/login/login.component";
 import { DashboardComponent } from "./pages/dashboard/dashboard.component";
 import { LabelsComponent } from "./pages/labels/labels.component";
+import { AdminsComponent } from "./pages/admins/admins.component";
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'labels', component: LabelsComponent, title: 'YOLO Annotation Tool' },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'admins', component: AdminsComponent },
   { path: '**', redirectTo: '/labels' }
 ];
