@@ -388,4 +388,19 @@ export class RoutineComponent implements OnInit {
 
     this.routineForm.patchValue({ assignedUsers: updatedUsers });
   }
+
+  // Modal scroll handling
+  onModalScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    const scrollTop = target.scrollTop;
+    const modalForm = target.closest('.modal-form');
+    
+    if (modalForm) {
+      if (scrollTop > 10) {
+        modalForm.classList.add('scrolled');
+      } else {
+        modalForm.classList.remove('scrolled');
+      }
+    }
+  }
 }
