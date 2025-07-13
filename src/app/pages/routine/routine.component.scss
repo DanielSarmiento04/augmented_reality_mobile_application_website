@@ -602,21 +602,25 @@
   justify-content: center;
   z-index: 1000;
   padding: var(--spacing-4);
+
+  &.danger {
+    background: rgba(239, 68, 68, 0.1);
+  }
 }
 
-.modal-container {
+.modal {
   background: var(--background-color);
-  border-radius: var(--border-radius-xl);
-  box-shadow: var(--shadow-lg);
-  max-width: 800px;
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-2xl);
   width: 100%;
+  max-width: 600px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 
-  &--sm {
-    max-width: 500px;
+  &--danger {
+    border: 2px solid var(--error);
   }
 }
 
@@ -662,6 +666,11 @@
   }
 }
 
+.modal-body {
+  padding: var(--spacing-6);
+  flex: 1;
+}
+
 .modal-form {
   padding: var(--spacing-6);
   overflow-y: auto;
@@ -680,6 +689,60 @@
   padding: var(--spacing-6);
   border-top: 1px solid var(--border-color);
   background: var(--surface-secondary);
+}
+
+// === DANGER CONTENT ===
+.danger-content {
+  display: flex;
+  gap: var(--spacing-6);
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.danger-icon {
+  flex-shrink: 0;
+
+  i {
+    font-size: var(--font-size-5xl);
+    color: var(--error);
+  }
+}
+
+.danger-text {
+  flex: 1;
+
+  h3 {
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-2) 0;
+  }
+
+  p {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-4) 0;
+  }
+}
+
+.warning-message {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--warning-light);
+  border: 1px solid var(--warning);
+  border-radius: var(--border-radius-lg);
+  color: var(--warning-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  i {
+    color: var(--warning);
+  }
 }
 
 // === FORM STYLES ===
@@ -973,6 +1036,9 @@
 .icon-file::before { content: "📄"; }
 .icon-chevron-left::before { content: "←"; }
 .icon-chevron-right::before { content: "→"; }
+.icon-alert-triangle::before { content: "⚠️"; }
+.icon-warning::before { content: "⚠️"; }
+.icon-trash-large::before { content: "🗑️"; }
 
 // === RESPONSIVE ADJUSTMENTS ===
 @media (max-width: 1024px) {

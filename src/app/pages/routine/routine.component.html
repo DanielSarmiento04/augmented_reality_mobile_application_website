@@ -492,46 +492,59 @@
 
 <!-- Delete Confirmation Modal -->
 @if (isDeleteModalOpen && selectedRoutine) {
-  <div class="modal-overlay" (click)="closeModals()">
-    <div class="modal-container modal-container--sm" (click)="$event.stopPropagation()">
+  <div class="modal-overlay danger" (click)="closeModals()">
+    <div class="modal modal--danger" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 class="modal-title">
-          <i class="icon-trash"></i>
+          <i class="icon-alert-triangle"></i>
           Confirmar Eliminación
         </h2>
-        <button class="modal-close" (click)="closeModals()">
-          <i class="icon-x"></i>
-        </button>
       </div>
 
-      <div class="modal-content">
-        <p class="delete-warning">
-          ¿Estás seguro de que deseas eliminar la rutina <strong>"{{ selectedRoutine.name }}"</strong>?
-        </p>
-        <p class="delete-consequence">
-          Esta acción no se puede deshacer y se perderán todos los datos asociados.
-        </p>
+      <div class="modal-body">
+        <div class="danger-content">
+          <div class="danger-icon">
+            <i class="icon-trash-large"></i>
+          </div>
+          <div class="danger-text">
+            <h3>¿Estás seguro que deseas eliminar esta rutina?</h3>
+            <p><strong>{{ selectedRoutine.name }}</strong></p>
+            <div class="warning-message">
+              <i class="icon-warning"></i>
+              Esta acción no se puede deshacer y se perderán todos los datos asociados
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn--secondary"
+          class="btn btn--outline"
           (click)="closeModals()"
           [disabled]="isLoading"
         >
           Cancelar
         </button>
+
         <button
           type="button"
           class="btn btn--danger"
           (click)="deleteRoutine()"
           [disabled]="isLoading"
+          [class.loading]="isLoading"
         >
-          @if (isLoading) {
-            <div class="btn-spinner"></div>
+          @if (!isLoading) {
+            <span>
+              <i class="icon-trash"></i>
+              Eliminar Rutina
+            </span>
+          } @else {
+            <span class="btn-loading">
+              <div class="loading-spinner"></div>
+              Eliminando...
+            </span>
           }
-          Eliminar Rutina
         </button>
       </div>
     </div>
