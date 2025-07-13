@@ -1,13 +1,42 @@
-# RoutineComponent - Routine Management Interface
+# RoutineComponent - Gestión de Rutinas AR
 
-## Overview
+## Descripción
+El RoutineComponent es una interfaz completa de administración para gestionar rutinas de realidad aumentada en el sistema. Permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre las rutinas, con un diseño moderno e interactivo siguiendo el sistema de diseño establecido.
 
-The RoutineComponent provides a comprehensive routine management interface for creating, editing, and managing work procedures and workflows. This component allows users to define step-by-step routines with associated 3D models and inference models for augmented reality applications.
+## Características Implementadas
 
-## Features
+### 🎯 Funcionalidades CRUD Completas
+- **Crear**: Formulario completo para crear nuevas rutinas con validación
+- **Leer**: Vista de tabla con paginación y filtros avanzados
+- **Actualizar**: Edición de rutinas existentes con pre-llenado de datos
+- **Eliminar**: Confirmación de eliminación con modal de seguridad
 
-### ✅ Routine Management
-- **Create Routines**: Add new routines with name, description, and step-by-step procedures
+### 🔍 Búsqueda y Filtros Avanzados
+- Búsqueda en tiempo real por nombre, descripción, departamento y etiquetas
+- Filtros por estado (Borrador, Activo, Completado, Archivado)
+- Filtros por prioridad (Baja, Media, Alta, Urgente)
+- Contador de resultados en tiempo real
+
+### 📱 Interfaz Responsiva
+- Diseño adaptable para desktop, tablet y móvil
+- Tabla responsive con scroll horizontal en dispositivos pequeños
+- Modales optimizados para diferentes tamaños de pantalla
+
+### 📂 Gestión de Archivos AR
+- **Modelo 3D**: Upload de archivos GLB para modelos 3D
+- **Modelo de Inferencia**: Upload de archivos TFLite para IA
+- Validación de tipos de archivo específicos
+- Preview de archivos seleccionados
+
+### 👥 Asignación de Usuarios
+- Selección múltiple de usuarios para asignar a rutinas
+- Interfaz de checkbox con información del usuario
+- Visualización de usuarios asignados en la tabla
+
+### 🎨 Sistema de Estados y Prioridades
+- **Estados**: Draft, Active, Completed, Archived con badges colorados
+- **Prioridades**: Low, Medium, High, Urgent (con animación pulse para urgente)
+- Indicadores visuales claros y accesibles
 - **Edit Routines**: Update existing routine information and modify steps
 - **Delete Routines**: Remove routines from the system with confirmation
 - **Duplicate Routines**: Create copies of existing routines for quick setup

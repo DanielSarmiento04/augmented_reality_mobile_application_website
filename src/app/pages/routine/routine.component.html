@@ -7,39 +7,37 @@
           <i class="icon-settings"></i>
           Gestión de Rutinas
         </h1>
-        <p class="page-subtitle">
-          Administra las rutinas de trabajo y procedimientos del sistema
-        </p>
+        <p class="page-subtitle">Administra las rutinas AR del sistema</p>
       </div>
 
       <div class="header-actions">
         <button
-          class="btn btn--primary"
+          class="btn btn--primary btn--lg"
           (click)="openCreateModal()"
           [disabled]="isLoading"
         >
           <i class="icon-plus"></i>
-          Nueva Rutina
+          Crear Rutina
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Search and Filters -->
+  <!-- Filters and Search -->
   <div class="filters-section">
     <div class="search-container">
-      <div class="search-input-wrapper">
-        <i class="icon-search search-icon"></i>
+      <div class="search-wrapper">
+        <i class="icon-search"></i>
         <input
           type="text"
-          placeholder="Buscar rutinas por nombre, descripción o pasos..."
           class="search-input"
+          placeholder="Buscar por nombre, descripción o departamento..."
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
         />
         @if (searchTerm) {
           <button
-            class="btn btn--ghost btn--sm clear-search"
+            class="clear-search"
             (click)="searchTerm = ''; onSearch()"
           >
             <i class="icon-x"></i>
@@ -48,357 +46,444 @@
       </div>
     </div>
 
-    <div class="results-info">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="status-filter" class="filter-label">Estado:</label>
+        <select
+          id="status-filter"
+          class="filter-select"
+          [(ngModel)]="selectedStatusFilter"
+          (change)="onStatusFilterChange()"
+        >
+          <option value="all">Todos</option>
+          <option value="draft">Borrador</option>
+          <option value="active">Activo</option>
+          <option value="completed">Completado</option>
+          <option value="archived">Archivado</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="priority-filter" class="filter-label">Prioridad:</label>
+        <select
+          id="priority-filter"
+          class="filter-select"
+          [(ngModel)]="selectedPriorityFilter"
+          (change)="onPriorityFilterChange()"
+        >
+          <option value="all">Todas</option>
+          <option value="low">Baja</option>
+          <option value="medium">Media</option>
+          <option value="high">Alta</option>
+          <option value="urgent">Urgente</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-info">
       <span class="results-count">
-        Mostrando {{ paginatedRoutines.length }} de {{ filteredRoutines.length }} rutinas
+        {{ filteredRoutines.length }} rutina{{ filteredRoutines.length !== 1 ? 's' : '' }} encontrada{{ filteredRoutines.length !== 1 ? 's' : '' }}
       </span>
     </div>
   </div>
 
-  <!-- Routines Grid -->
-  <div class="routines-container" [class.loading]="isLoading">
-    <div class="routines-grid">
-      @for (routine of paginatedRoutines; track trackByRoutineId($index, routine)) {
-        <div class="routine-card">
-          <div class="card-header">
-            <div class="routine-info">
-              <h3 class="routine-name">{{ routine.name }}</h3>
-              <p class="routine-description">{{ routine.description }}</p>
-            </div>
-            <div class="routine-status">
-              <span class="badge" [class]="getModelStatusClass(routine)">
-                {{ getModelStatus(routine) }}
-              </span>
-            </div>
-          </div>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Cargando rutinas...</p>
+    </div>
+  }
 
-          <div class="card-body">
-            <div class="routine-stats">
-              <div class="stat-item">
-                <i class="icon-list"></i>
-                <span>{{ getStepCount(routine) }}</span>
-              </div>
-              <div class="stat-item">
-                <i class="icon-calendar"></i>
-                <span>{{ formatDate(routine.updatedAt) }}</span>
-              </div>
-            </div>
-
-            <div class="routine-models">
-              <div class="model-item" [class.available]="routine.model_3d">
-                <i class="icon-box"></i>
-                <span>Modelo 3D</span>
-                @if (routine.model_3d) {
-                  <i class="icon-check status-icon"></i>
+  <!-- Routines Table -->
+  @if (!isLoading) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rutina</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Duración</th>
+            <th>Usuarios Asignados</th>
+            <th>Departamento</th>
+            <th>Última Ejecución</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (routine of paginatedRoutines; track routine.id) {
+            <tr class="table-row">
+              <td class="routine-info">
+                <div class="routine-details">
+                  <h3 class="routine-name">{{ routine.name }}</h3>
+                  <p class="routine-description">{{ routine.description }}</p>
+                  @if (routine.tags.length > 0) {
+                    <div class="tags-container">
+                      @for (tag of routine.tags; track tag) {
+                        <span class="tag">{{ tag }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(routine.status)">
+                  {{ routine.status === 'draft' ? 'Borrador' : 
+                     routine.status === 'active' ? 'Activo' : 
+                     routine.status === 'completed' ? 'Completado' : 'Archivado' }}
+                </span>
+              </td>
+              <td>
+                <span class="priority-badge" [class]="getPriorityClass(routine.priority)">
+                  {{ routine.priority === 'low' ? 'Baja' : 
+                     routine.priority === 'medium' ? 'Media' : 
+                     routine.priority === 'high' ? 'Alta' : 'Urgente' }}
+                </span>
+              </td>
+              <td class="duration-cell">
+                {{ formatDuration(routine.estimatedDuration) }}
+              </td>
+              <td class="users-cell">
+                <div class="users-info">
+                  <span class="users-count">{{ routine.assignedUsers.length }}</span>
+                  <span class="users-names">{{ getUserNames(routine.assignedUsers) }}</span>
+                </div>
+              </td>
+              <td class="department-cell">
+                {{ routine.department || '-' }}
+              </td>
+              <td class="execution-cell">
+                @if (routine.lastExecuted) {
+                  <div class="execution-info">
+                    <span class="execution-date">{{ routine.lastExecuted | date:'dd/MM/yyyy' }}</span>
+                    <span class="execution-count">{{ routine.executionCount }} ejecuciones</span>
+                  </div>
                 } @else {
-                  <i class="icon-x status-icon"></i>
+                  <span class="no-execution">Sin ejecutar</span>
                 }
-              </div>
-              <div class="model-item" [class.available]="routine.model_inference">
-                <i class="icon-cpu"></i>
-                <span>Inferencia</span>
-                @if (routine.model_inference) {
-                  <i class="icon-check status-icon"></i>
-                } @else {
-                  <i class="icon-x status-icon"></i>
-                }
-              </div>
-            </div>
-          </div>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button
+                    class="btn btn--sm btn--secondary"
+                    (click)="openEditModal(routine)"
+                    title="Editar rutina"
+                  >
+                    <i class="icon-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn--sm btn--danger"
+                    (click)="openDeleteModal(routine)"
+                    title="Eliminar rutina"
+                  >
+                    <i class="icon-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-content">
+                  <i class="icon-settings icon-empty"></i>
+                  <h3>No se encontraron rutinas</h3>
+                  <p>No hay rutinas que coincidan con los filtros aplicados</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-          <div class="card-actions">
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination-container">
+        <div class="pagination">
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)"
+          >
+            <i class="icon-chevron-left"></i>
+          </button>
+          
+          @for (page of [].constructor(totalPages); track $index; let i = $index) {
             <button
-              class="btn btn--ghost btn--sm action-btn"
-              (click)="openEditModal(routine)"
-              [disabled]="isLoading"
-              title="Editar rutina"
+              class="pagination-btn"
+              [class.active]="currentPage === i + 1"
+              (click)="changePage(i + 1)"
             >
-              <i class="icon-edit"></i>
-            </button>
-
-            <button
-              class="btn btn--ghost btn--sm action-btn"
-              (click)="duplicateRoutine(routine)"
-              [disabled]="isLoading"
-              title="Duplicar rutina"
-            >
-              <i class="icon-copy"></i>
-            </button>
-
-            <button
-              class="btn btn--ghost btn--sm action-btn delete-btn"
-              (click)="confirmDelete(routine)"
-              [disabled]="isLoading"
-              title="Eliminar rutina"
-            >
-              <i class="icon-trash"></i>
-            </button>
-          </div>
-        </div>
-      }
-
-      <!-- Empty State -->
-      @if (!isLoading && paginatedRoutines.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="icon-settings"></i>
-          </div>
-          <h3 class="empty-title">No se encontraron rutinas</h3>
-          <p class="empty-description">
-            @if (searchTerm) {
-              No hay rutinas que coincidan con "{{ searchTerm }}"
-            } @else {
-              Aún no has creado ninguna rutina. Crea tu primera rutina para comenzar.
-            }
-          </p>
-          @if (!searchTerm) {
-            <button
-              class="btn btn--primary"
-              (click)="openCreateModal()"
-            >
-              <i class="icon-plus"></i>
-              Crear Primera Rutina
+              {{ i + 1 }}
             </button>
           }
+          
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="changePage(currentPage + 1)"
+          >
+            <i class="icon-chevron-right"></i>
+          </button>
         </div>
-      }
-    </div>
-
-    <!-- Loading State -->
-    @if (isLoading) {
-      <div class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <span>Cargando rutinas...</span>
       </div>
     }
-  </div>
-
-  <!-- Pagination -->
-  @if (totalPages > 1 && !isLoading) {
-    <div class="pagination-container">
-      <div class="pagination">
-        <button
-          class="btn btn--ghost btn--sm"
-          (click)="changePage(currentPage - 1)"
-          [disabled]="currentPage === 1"
-        >
-          <i class="icon-chevron-left"></i>
-        </button>
-
-        @for (page of [].constructor(totalPages); track $index) {
-          <button
-            class="btn btn--ghost btn--sm page-btn"
-            [class.active]="currentPage === $index + 1"
-            (click)="changePage($index + 1)"
-          >
-            {{ $index + 1 }}
-          </button>
-        }
-
-        <button
-          class="btn btn--ghost btn--sm"
-          (click)="changePage(currentPage + 1)"
-          [disabled]="currentPage === totalPages"
-        >
-          <i class="icon-chevron-right"></i>
-        </button>
-      </div>
-    </div>
   }
 </div>
 
-<!-- Routine Modal -->
-@if (isModalOpen) {
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal modal--large" (click)="$event.stopPropagation()">
+<!-- Create/Edit Modal -->
+@if (isCreateModalOpen || isEditModalOpen) {
+  <div class="modal-overlay" (click)="closeModals()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 class="modal-title">
-          <i [class]="isEditMode ? 'icon-edit' : 'icon-plus'"></i>
-          {{ isEditMode ? 'Editar Rutina' : 'Crear Nueva Rutina' }}
+          <i class="icon-settings"></i>
+          {{ isCreateModalOpen ? 'Crear Nueva Rutina' : 'Editar Rutina' }}
         </h2>
-        <button class="btn btn--ghost btn--sm close-btn" (click)="closeModal()">
+        <button class="modal-close" (click)="closeModals()">
           <i class="icon-x"></i>
         </button>
       </div>
 
-      <div class="modal-body">
-        <form [formGroup]="routineForm" class="routine-form">
-          <!-- Basic Information -->
-          <div class="form-section">
-            <h3 class="section-title">Información Básica</h3>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="name" class="form-label">
-                  <i class="icon-type"></i>
-                  Nombre de la Rutina
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  formControlName="name"
-                  class="form-input"
-                  placeholder="Ingrese el nombre de la rutina"
-                />
-                @if (routineForm.get('name')?.errors && routineForm.get('name')?.touched) {
-                  <div class="form-error">
-                    @if (routineForm.get('name')?.errors?.['required']) {
-                      <span>El nombre es requerido</span>
-                    }
-                    @if (routineForm.get('name')?.errors?.['minlength']) {
-                      <span>El nombre debe tener al menos 3 caracteres</span>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="description" class="form-label">
-                  <i class="icon-file-text"></i>
-                  Descripción
-                </label>
-                <textarea
-                  id="description"
-                  formControlName="description"
-                  class="form-textarea"
-                  rows="3"
-                  placeholder="Describe el propósito y objetivo de esta rutina"
-                ></textarea>
-                @if (routineForm.get('description')?.errors && routineForm.get('description')?.touched) {
-                  <div class="form-error">
-                    @if (routineForm.get('description')?.errors?.['required']) {
-                      <span>La descripción es requerida</span>
-                    }
-                    @if (routineForm.get('description')?.errors?.['minlength']) {
-                      <span>La descripción debe tener al menos 10 caracteres</span>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-
-          <!-- Steps Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <h3 class="section-title">Pasos de la Rutina</h3>
-              <button
-                type="button"
-                class="btn btn--secondary btn--sm"
-                (click)="addStep()"
-              >
-                <i class="icon-plus"></i>
-                Agregar Paso
-              </button>
-            </div>
-
-            <div class="steps-container" formArrayName="steps">
-              @for (stepControl of stepsArray.controls; track trackByIndex($index)) {
-                <div class="step-item" [formGroupName]="$index">
-                  <div class="step-number">{{ $index + 1 }}</div>
-                  <div class="step-input-group">
-                    <input
-                      type="text"
-                      [formControlName]="$index"
-                      class="form-input"
-                      [placeholder]="'Paso ' + ($index + 1)"
-                    />
-                    @if (stepControl.errors && stepControl.touched) {
-                      <div class="form-error">
-                        <span>Este paso es requerido</span>
-                      </div>
-                    }
-                  </div>
-                  @if (stepsArray.length > 1) {
-                    <button
-                      type="button"
-                      class="btn btn--ghost btn--sm remove-step-btn"
-                      (click)="removeStep($index)"
-                      title="Eliminar paso"
-                    >
-                      <i class="icon-trash"></i>
-                    </button>
-                  }
-                </div>
+      <form [formGroup]="routineForm" class="modal-form">
+        <div class="form-section">
+          <h3 class="section-title">Información Básica</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name" class="form-label">Nombre de la Rutina *</label>
+              <input
+                type="text"
+                id="name"
+                class="form-input"
+                formControlName="name"
+                placeholder="Ej: Inspección de calidad AR"
+              />
+              @if (routineForm.get('name')?.invalid && routineForm.get('name')?.touched) {
+                <span class="form-error">El nombre es requerido (mínimo 3 caracteres)</span>
               }
             </div>
           </div>
 
-          <!-- Models Section -->
-          <div class="form-section">
-            <h3 class="section-title">Modelos Asociados</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="description" class="form-label">Descripción *</label>
+              <textarea
+                id="description"
+                class="form-textarea"
+                formControlName="description"
+                placeholder="Describe el propósito y objetivos de esta rutina..."
+                rows="3"
+              ></textarea>
+              @if (routineForm.get('description')?.invalid && routineForm.get('description')?.touched) {
+                <span class="form-error">La descripción es requerida (mínimo 10 caracteres)</span>
+              }
+            </div>
+          </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="model_3d" class="form-label">
-                  <i class="icon-box"></i>
-                  Modelo 3D
-                </label>
+          <div class="form-row form-row--half">
+            <div class="form-group">
+              <label for="priority" class="form-label">Prioridad *</label>
+              <select id="priority" class="form-select" formControlName="priority">
+                <option value="low">Baja</option>
+                <option value="medium">Media</option>
+                <option value="high">Alta</option>
+                <option value="urgent">Urgente</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="status" class="form-label">Estado *</label>
+              <select id="status" class="form-select" formControlName="status">
+                <option value="draft">Borrador</option>
+                <option value="active">Activo</option>
+                <option value="completed">Completado</option>
+                <option value="archived">Archivado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row form-row--half">
+            <div class="form-group">
+              <label for="estimatedDuration" class="form-label">Duración Estimada (minutos) *</label>
+              <input
+                type="number"
+                id="estimatedDuration"
+                class="form-input"
+                formControlName="estimatedDuration"
+                min="1"
+                placeholder="30"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="department" class="form-label">Departamento</label>
+              <input
+                type="text"
+                id="department"
+                class="form-input"
+                formControlName="department"
+                placeholder="Ej: Control de Calidad"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tags" class="form-label">Etiquetas</label>
+              <input
+                type="text"
+                id="tags"
+                class="form-input"
+                formControlName="tags"
+                placeholder="Separadas por comas: AR, calidad, inspección"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Pasos de la Rutina</h3>
+          
+          <div formArrayName="steps" class="steps-container">
+            @for (stepControl of stepsArray.controls; track $index; let i = $index) {
+              <div [formGroupName]="i" class="step-item">
+                <div class="step-header">
+                  <span class="step-number">{{ i + 1 }}</span>
+                  <button
+                    type="button"
+                    class="btn btn--sm btn--danger"
+                    (click)="removeStep(i)"
+                    [disabled]="stepsArray.length === 1"
+                    title="Eliminar paso"
+                  >
+                    <i class="icon-trash"></i>
+                  </button>
+                </div>
                 <input
                   type="text"
-                  id="model_3d"
-                  formControlName="model_3d"
                   class="form-input"
-                  placeholder="Ruta o nombre del archivo del modelo 3D (opcional)"
+                  formControlName="step"
+                  placeholder="Describe este paso de la rutina..."
                 />
-                <div class="form-help">
-                  Especifica el archivo del modelo 3D asociado a esta rutina
+              </div>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            (click)="addStep()"
+          >
+            <i class="icon-plus"></i>
+            Agregar Paso
+          </button>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Archivos de Modelos</h3>
+          
+          <div class="form-row form-row--half">
+            <div class="form-group">
+              <label for="model3d" class="form-label">Modelo 3D (GLB)</label>
+              <div class="file-upload-container">
+                <input
+                  type="file"
+                  id="model3d"
+                  class="file-input"
+                  accept=".glb"
+                  (change)="onModel3DFileChange($event)"
+                />
+                <div class="file-upload-display">
+                  @if (model3DPreview) {
+                    <div class="file-preview">
+                      <i class="icon-file"></i>
+                      <span>{{ model3DPreview }}</span>
+                    </div>
+                  } @else {
+                    <div class="file-placeholder">
+                      <i class="icon-upload"></i>
+                      <span>Seleccionar archivo GLB</span>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="model_inference" class="form-label">
-                  <i class="icon-cpu"></i>
-                  Modelo de Inferencia
-                </label>
+            <div class="form-group">
+              <label for="modelInference" class="form-label">Modelo de Inferencia (TFLite)</label>
+              <div class="file-upload-container">
                 <input
-                  type="text"
-                  id="model_inference"
-                  formControlName="model_inference"
-                  class="form-input"
-                  placeholder="Ruta o nombre del archivo del modelo de inferencia (opcional)"
+                  type="file"
+                  id="modelInference"
+                  class="file-input"
+                  accept=".tflite"
+                  (change)="onModelInferenceFileChange($event)"
                 />
-                <div class="form-help">
-                  Especifica el archivo del modelo de inferencia para esta rutina
+                <div class="file-upload-display">
+                  @if (modelInferencePreview) {
+                    <div class="file-preview">
+                      <i class="icon-file"></i>
+                      <span>{{ modelInferencePreview }}</span>
+                    </div>
+                  } @else {
+                    <div class="file-placeholder">
+                      <i class="icon-upload"></i>
+                      <span>Seleccionar archivo TFLite</span>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Usuarios Asignados</h3>
+          
+          <div class="form-group">
+            <label class="form-label">Seleccionar Usuarios</label>
+            <div class="users-checklist">
+              @for (user of users; track user.id) {
+                <label class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    [value]="user.id"
+                    [checked]="routineForm.get('assignedUsers')?.value?.includes(user.id)"
+                    (change)="onUserSelectionChange($event, user.id)"
+                  />
+                  <span class="checkbox-mark"></span>
+                  <div class="user-info">
+                    <span class="user-name">{{ user.username }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+      </form>
 
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn--outline"
-          (click)="closeModal()"
+          class="btn btn--secondary"
+          (click)="closeModals()"
           [disabled]="isLoading"
         >
           Cancelar
         </button>
-
         <button
-          type="submit"
+          type="button"
           class="btn btn--primary"
-          (click)="onSubmit()"
+          (click)="isCreateModalOpen ? createRoutine() : updateRoutine()"
           [disabled]="routineForm.invalid || isLoading"
-          [class.loading]="isLoading"
         >
-          @if (!isLoading) {
-            <span>
-              <i [class]="isEditMode ? 'icon-save' : 'icon-plus'"></i>
-              {{ isEditMode ? 'Actualizar' : 'Crear' }} Rutina
-            </span>
-          } @else {
-            <span class="btn-loading">
-              <div class="loading-spinner"></div>
-              {{ isEditMode ? 'Actualizando...' : 'Creando...' }}
-            </span>
+          @if (isLoading) {
+            <div class="btn-spinner"></div>
           }
+          {{ isCreateModalOpen ? 'Crear Rutina' : 'Actualizar Rutina' }}
         </button>
       </div>
     </div>
@@ -406,22 +491,24 @@
 }
 
 <!-- Delete Confirmation Modal -->
-@if (showDeleteConfirm) {
-  <div class="modal-overlay danger" (click)="cancelDelete()">
-    <div class="modal modal--danger" (click)="$event.stopPropagation()">
+@if (isDeleteModalOpen && selectedRoutine) {
+  <div class="modal-overlay" (click)="closeModals()">
+    <div class="modal-container modal-container--sm" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 class="modal-title">
-          <i class="icon-alert-triangle"></i>
+          <i class="icon-trash"></i>
           Confirmar Eliminación
         </h2>
+        <button class="modal-close" (click)="closeModals()">
+          <i class="icon-x"></i>
+        </button>
       </div>
 
-      <div class="modal-body">
-        <p class="confirm-message">
-          ¿Estás seguro de que deseas eliminar la rutina
-          <strong>"{{ routineToDelete?.name }}"</strong>?
+      <div class="modal-content">
+        <p class="delete-warning">
+          ¿Estás seguro de que deseas eliminar la rutina <strong>"{{ selectedRoutine.name }}"</strong>?
         </p>
-        <p class="confirm-warning">
+        <p class="delete-consequence">
           Esta acción no se puede deshacer y se perderán todos los datos asociados.
         </p>
       </div>
@@ -429,31 +516,22 @@
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn--outline"
-          (click)="cancelDelete()"
+          class="btn btn--secondary"
+          (click)="closeModals()"
           [disabled]="isLoading"
         >
           Cancelar
         </button>
-
         <button
           type="button"
           class="btn btn--danger"
           (click)="deleteRoutine()"
           [disabled]="isLoading"
-          [class.loading]="isLoading"
         >
-          @if (!isLoading) {
-            <span>
-              <i class="icon-trash"></i>
-              Eliminar Rutina
-            </span>
-          } @else {
-            <span class="btn-loading">
-              <div class="loading-spinner"></div>
-              Eliminando...
-            </span>
+          @if (isLoading) {
+            <div class="btn-spinner"></div>
           }
+          Eliminar Rutina
         </button>
       </div>
     </div>

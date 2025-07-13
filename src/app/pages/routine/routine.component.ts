@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Routine } from '../../models/routines.model';
 import { User } from '../../models/user.model';
 import { RoutineService } from '../../services/routine.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'custom-routine',
@@ -16,84 +17,77 @@ import { RoutineService } from '../../services/routine.service';
 export class RoutineComponent implements OnInit {
   routines: Routine[] = [];
   filteredRoutines: Routine[] = [];
-  availableUsers: User[] = [];
-  routineForm: FormGroup;
-  searchTerm = '';
-  selectedRoutine: Routine | null = null;
-  isModalOpen = false;
-  isEditMode = false;
+  users: User[] = [];
   isLoading = false;
-  showDeleteConfirm = false;
-  routineToDelete: Routine | null = null;
+  searchTerm = '';
+  selectedStatusFilter = 'all';
+  selectedPriorityFilter = 'all';
   
-  // Filters
-  selectedStatus: Routine['status'] | '' = '';
-  selectedPriority: Routine['priority'] | '' = '';
-  selectedDepartment = '';
-  selectedAssignedUser = '';
-  
-  // Analytics
-  analytics: any = null;
-  showAnalytics = false;
-  
+  // Modal and form states
+  isCreateModalOpen = false;
+  isEditModalOpen = false;
+  isDeleteModalOpen = false;
+  selectedRoutine: Routine | null = null;
+  routineForm: FormGroup;
+
+  // File upload states
+  uploadedModel3D: File | null = null;
+  uploadedModelInference: File | null = null;
+  model3DPreview = '';
+  modelInferencePreview = '';
+
   // Pagination
   currentPage = 1;
-  itemsPerPage = 6;
-  totalPages = 0;
-
-  // Available options
-  statusOptions: { value: Routine['status']; label: string; color: string }[] = [
-    { value: 'draft', label: 'Borrador', color: 'secondary' },
-    { value: 'active', label: 'Activa', color: 'success' },
-    { value: 'completed', label: 'Completada', color: 'primary' },
-    { value: 'archived', label: 'Archivada', color: 'warning' }
-  ];
-
-  priorityOptions: { value: Routine['priority']; label: string; color: string }[] = [
-    { value: 'low', label: 'Baja', color: 'secondary' },
-    { value: 'medium', label: 'Media', color: 'primary' },
-    { value: 'high', label: 'Alta', color: 'warning' },
-    { value: 'urgent', label: 'Urgente', color: 'danger' }
-  ];
-
-  departments = [
-    'Control de Calidad',
-    'Producción',
-    'Mantenimiento',
-    'Ensamblaje',
-    'Investigación y Desarrollo',
-    'Logística'
-  ];
+  itemsPerPage = 10;
+  totalPages = 1;
 
   constructor(
-    private fb: FormBuilder,
-    private routineService: RoutineService
+    private routineService: RoutineService,
+    private userService: UserService,
+    private formBuilder: FormBuilder
   ) {
-    this.routineForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      steps: this.fb.array([]),
-      model_3d: [''],
-      model_inference: [''],
-      assignedUsers: [[]],
-      priority: ['medium', Validators.required],
-      estimatedDuration: [60, [Validators.required, Validators.min(1)]],
-      tags: [[]],
-      department: ['']
-    });
+    this.routineForm = this.createRoutineForm();
   }
 
   ngOnInit(): void {
     this.loadRoutines();
-    this.loadAvailableUsers();
-    this.loadAnalytics();
+    this.loadUsers();
+  }
+
+  private createRoutineForm(): FormGroup {
+    return this.formBuilder.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      steps: this.formBuilder.array([this.createStepControl()]),
+      priority: ['medium', Validators.required],
+      status: ['draft', Validators.required],
+      estimatedDuration: [30, [Validators.required, Validators.min(1)]],
+      tags: [''],
+      department: [''],
+      assignedUsers: [[]]
+    });
+  }
+
+  private createStepControl(): FormGroup {
+    return this.formBuilder.group({
+      step: ['', Validators.required]
+    });
   }
 
   get stepsArray(): FormArray {
     return this.routineForm.get('steps') as FormArray;
   }
 
-  // Load routines from service
+  addStep(): void {
+    this.stepsArray.push(this.createStepControl());
+  }
+
+  removeStep(index: number): void {
+    if (this.stepsArray.length > 1) {
+      this.stepsArray.removeAt(index);
+    }
+  }
+
   loadRoutines(): void {
     this.isLoading = true;
     this.routineService.getRoutines().subscribe({
@@ -109,11 +103,10 @@ export class RoutineComponent implements OnInit {
     });
   }
 
-  // Load available users for assignment
-  loadAvailableUsers(): void {
-    this.routineService.getAvailableUsers().subscribe({
+  loadUsers(): void {
+    this.userService.getUsers().subscribe({
       next: (users) => {
-        this.availableUsers = users.filter(user => user.role !== 'admin');
+        this.users = users;
       },
       error: (error) => {
         console.error('Error loading users:', error);
@@ -121,53 +114,35 @@ export class RoutineComponent implements OnInit {
     });
   }
 
-  // Load analytics data
-  loadAnalytics(): void {
-    this.routineService.getRoutineAnalytics().subscribe({
-      next: (analytics) => {
-        this.analytics = analytics;
-      },
-      error: (error) => {
-        console.error('Error loading analytics:', error);
-      }
-    });
-  }
-
   applyFilters(): void {
-    let filtered = this.routines.filter(routine => 
-      routine.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      routine.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      routine.steps.some(step => step.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-      routine.tags.some(tag => tag.toLowerCase().includes(this.searchTerm.toLowerCase()))
-    );
+    let filtered = [...this.routines];
 
-    // Apply status filter
-    if (this.selectedStatus) {
-      filtered = filtered.filter(routine => routine.status === this.selectedStatus);
-    }
-
-    // Apply priority filter
-    if (this.selectedPriority) {
-      filtered = filtered.filter(routine => routine.priority === this.selectedPriority);
-    }
-
-    // Apply department filter
-    if (this.selectedDepartment) {
-      filtered = filtered.filter(routine => routine.department === this.selectedDepartment);
-    }
-
-    // Apply assigned user filter
-    if (this.selectedAssignedUser) {
-      filtered = filtered.filter(routine => 
-        routine.assignedUsers.some(user => user.id === this.selectedAssignedUser)
+    // Search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(routine =>
+        routine.name.toLowerCase().includes(term) ||
+        routine.description.toLowerCase().includes(term) ||
+        routine.department?.toLowerCase().includes(term) ||
+        routine.tags.some(tag => tag.toLowerCase().includes(term))
       );
     }
 
+    // Status filter
+    if (this.selectedStatusFilter !== 'all') {
+      filtered = filtered.filter(routine => routine.status === this.selectedStatusFilter);
+    }
+
+    // Priority filter
+    if (this.selectedPriorityFilter !== 'all') {
+      filtered = filtered.filter(routine => routine.priority === this.selectedPriorityFilter);
+    }
+
     this.filteredRoutines = filtered;
-    this.calculatePagination();
+    this.updatePagination();
   }
 
-  calculatePagination(): void {
+  updatePagination(): void {
     this.totalPages = Math.ceil(this.filteredRoutines.length / this.itemsPerPage);
     if (this.currentPage > this.totalPages) {
       this.currentPage = 1;
@@ -175,9 +150,9 @@ export class RoutineComponent implements OnInit {
   }
 
   get paginatedRoutines(): Routine[] {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return this.filteredRoutines.slice(startIndex, endIndex);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredRoutines.slice(start, end);
   }
 
   onSearch(): void {
@@ -185,136 +160,159 @@ export class RoutineComponent implements OnInit {
     this.applyFilters();
   }
 
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
+  onPriorityFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
   openCreateModal(): void {
-    this.isEditMode = false;
     this.selectedRoutine = null;
     this.routineForm.reset();
-    this.clearStepsArray();
-    this.addStep(); // Start with one step
-    this.isModalOpen = true;
+    this.resetFileUploads();
+    this.isCreateModalOpen = true;
   }
 
   openEditModal(routine: Routine): void {
-    this.isEditMode = true;
     this.selectedRoutine = routine;
+    this.populateForm(routine);
+    this.isEditModalOpen = true;
+  }
+
+  openDeleteModal(routine: Routine): void {
+    this.selectedRoutine = routine;
+    this.isDeleteModalOpen = true;
+  }
+
+  closeModals(): void {
+    this.isCreateModalOpen = false;
+    this.isEditModalOpen = false;
+    this.isDeleteModalOpen = false;
+    this.selectedRoutine = null;
+    this.resetFileUploads();
+  }
+
+  private populateForm(routine: Routine): void {
+    // Clear existing steps
+    while (this.stepsArray.length > 0) {
+      this.stepsArray.removeAt(0);
+    }
+
+    // Add steps from routine
+    routine.steps.forEach(step => {
+      this.stepsArray.push(this.formBuilder.group({ step: [step, Validators.required] }));
+    });
+
     this.routineForm.patchValue({
       name: routine.name,
       description: routine.description,
-      model_3d: routine.model_3d || '',
-      model_inference: routine.model_inference || ''
+      priority: routine.priority,
+      status: routine.status,
+      estimatedDuration: routine.estimatedDuration,
+      tags: routine.tags.join(', '),
+      department: routine.department || '',
+      assignedUsers: routine.assignedUsers.map(user => user.id)
     });
-    
-    // Populate steps
-    this.clearStepsArray();
-    routine.steps.forEach(step => {
-      this.stepsArray.push(this.fb.control(step, [Validators.required]));
-    });
-    
-    this.isModalOpen = true;
-  }
 
-  openDuplicateModal(routine: Routine): void {
-    this.isEditMode = false;
-    this.selectedRoutine = null;
-    this.routineForm.patchValue({
-      name: `${routine.name} (Copia)`,
-      description: routine.description,
-      model_3d: routine.model_3d || '',
-      model_inference: routine.model_inference || ''
-    });
-    
-    // Populate steps
-    this.clearStepsArray();
-    routine.steps.forEach(step => {
-      this.stepsArray.push(this.fb.control(step, [Validators.required]));
-    });
-    
-    this.isModalOpen = true;
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.selectedRoutine = null;
-    this.routineForm.reset();
-    this.clearStepsArray();
-  }
-
-  clearStepsArray(): void {
-    while (this.stepsArray.length !== 0) {
-      this.stepsArray.removeAt(0);
+    // Handle file previews for existing files
+    if (typeof routine.model_3d === 'string' && routine.model_3d) {
+      this.model3DPreview = routine.model_3d;
+    }
+    if (typeof routine.model_inference === 'string' && routine.model_inference) {
+      this.modelInferencePreview = routine.model_inference;
     }
   }
 
-  addStep(): void {
-    this.stepsArray.push(this.fb.control('', [Validators.required]));
-  }
-
-  removeStep(index: number): void {
-    if (this.stepsArray.length > 1) {
-      this.stepsArray.removeAt(index);
+  onModel3DFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.name.toLowerCase().endsWith('.glb')) {
+      this.uploadedModel3D = file;
+      this.model3DPreview = file.name;
+    } else {
+      alert('Por favor selecciona un archivo GLB válido');
+      event.target.value = '';
     }
   }
 
-  onSubmit(): void {
+  onModelInferenceFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.name.toLowerCase().endsWith('.tflite')) {
+      this.uploadedModelInference = file;
+      this.modelInferencePreview = file.name;
+    } else {
+      alert('Por favor selecciona un archivo TFLite válido');
+      event.target.value = '';
+    }
+  }
+
+  private resetFileUploads(): void {
+    this.uploadedModel3D = null;
+    this.uploadedModelInference = null;
+    this.model3DPreview = '';
+    this.modelInferencePreview = '';
+  }
+
+  createRoutine(): void {
     if (this.routineForm.valid) {
       this.isLoading = true;
-      const formData = this.routineForm.value;
+      const formValue = this.routineForm.value;
       
-      if (this.isEditMode && this.selectedRoutine) {
-        this.updateRoutine(formData);
-      } else {
-        this.createRoutine(formData);
-      }
-    } else {
-      this.routineForm.markAllAsTouched();
-      this.stepsArray.controls.forEach(control => control.markAsTouched());
+      const newRoutine: Omit<Routine, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'executionCount' | 'lastExecuted'> = {
+        name: formValue.name,
+        description: formValue.description,
+        steps: formValue.steps.map((s: any) => s.step),
+        priority: formValue.priority,
+        status: formValue.status,
+        estimatedDuration: formValue.estimatedDuration,
+        tags: formValue.tags ? formValue.tags.split(',').map((tag: string) => tag.trim()) : [],
+        department: formValue.department,
+        model_3d: this.uploadedModel3D,
+        model_inference: this.uploadedModelInference,
+        assignedUsers: this.users.filter(user => formValue.assignedUsers.includes(user.id))
+      };
+
+      this.routineService.createRoutine(newRoutine).subscribe({
+        next: () => {
+          this.loadRoutines();
+          this.closeModals();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error creating routine:', error);
+          this.isLoading = false;
+        }
+      });
     }
   }
 
-  createRoutine(formData: any): void {
-    const routineData = {
-      name: formData.name,
-      description: formData.description,
-      steps: formData.steps.filter((step: string) => step.trim()),
-      model_3d: formData.model_3d || null,
-      model_inference: formData.model_inference || null
-    };
-    
-    this.routineService.createRoutine(routineData).subscribe({
-      next: (newRoutine) => {
-        this.routines.push(newRoutine);
-        this.applyFilters();
-        this.isLoading = false;
-        this.closeModal();
-        console.log('Routine created:', newRoutine);
-      },
-      error: (error) => {
-        console.error('Error creating routine:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  updateRoutine(formData: any): void {
-    if (this.selectedRoutine) {
-      const routineData = {
-        name: formData.name,
-        description: formData.description,
-        steps: formData.steps.filter((step: string) => step.trim()),
-        model_3d: formData.model_3d || null,
-        model_inference: formData.model_inference || null
-      };
+  updateRoutine(): void {
+    if (this.routineForm.valid && this.selectedRoutine) {
+      this.isLoading = true;
+      const formValue = this.routineForm.value;
       
-      this.routineService.updateRoutine(this.selectedRoutine.id, routineData).subscribe({
-        next: (updatedRoutine) => {
-          const routineIndex = this.routines.findIndex(r => r.id === this.selectedRoutine!.id);
-          if (routineIndex > -1) {
-            this.routines[routineIndex] = updatedRoutine;
-            this.applyFilters();
-          }
+      const updatedRoutine: Partial<Routine> = {
+        name: formValue.name,
+        description: formValue.description,
+        steps: formValue.steps.map((s: any) => s.step),
+        priority: formValue.priority,
+        status: formValue.status,
+        estimatedDuration: formValue.estimatedDuration,
+        tags: formValue.tags ? formValue.tags.split(',').map((tag: string) => tag.trim()) : [],
+        department: formValue.department,
+        model_3d: this.uploadedModel3D || this.selectedRoutine.model_3d,
+        model_inference: this.uploadedModelInference || this.selectedRoutine.model_inference,
+        assignedUsers: this.users.filter(user => formValue.assignedUsers.includes(user.id))
+      };
+
+      this.routineService.updateRoutine(this.selectedRoutine.id, updatedRoutine).subscribe({
+        next: () => {
+          this.loadRoutines();
+          this.closeModals();
           this.isLoading = false;
-          this.closeModal();
-          console.log('Routine updated:', updatedRoutine);
         },
         error: (error) => {
           console.error('Error updating routine:', error);
@@ -324,197 +322,70 @@ export class RoutineComponent implements OnInit {
     }
   }
 
-  confirmDelete(routine: Routine): void {
-    this.routineToDelete = routine;
-    this.showDeleteConfirm = true;
-  }
-
   deleteRoutine(): void {
-    if (this.routineToDelete) {
+    if (this.selectedRoutine) {
       this.isLoading = true;
-      
-      this.routineService.deleteRoutine(this.routineToDelete.id).subscribe({
+      this.routineService.deleteRoutine(this.selectedRoutine.id).subscribe({
         next: () => {
-          this.routines = this.routines.filter(r => r.id !== this.routineToDelete!.id);
-          this.applyFilters();
-          this.showDeleteConfirm = false;
-          this.routineToDelete = null;
+          this.loadRoutines();
+          this.closeModals();
           this.isLoading = false;
-          console.log('Routine deleted');
         },
         error: (error) => {
           console.error('Error deleting routine:', error);
-          this.showDeleteConfirm = false;
-          this.routineToDelete = null;
           this.isLoading = false;
         }
       });
     }
   }
 
-  cancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.routineToDelete = null;
-  }
-
-  duplicateRoutine(routine: Routine): void {
-    this.isLoading = true;
-    this.routineService.duplicateRoutine(routine.id).subscribe({
-      next: (duplicatedRoutine) => {
-        this.routines.push(duplicatedRoutine);
-        this.applyFilters();
-        this.isLoading = false;
-        console.log('Routine duplicated:', duplicatedRoutine);
-      },
-      error: (error) => {
-        console.error('Error duplicating routine:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
   changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
+    this.currentPage = page;
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  getPriorityClass(priority: string): string {
+    const classes = {
+      'low': 'priority-low',
+      'medium': 'priority-medium',
+      'high': 'priority-high',
+      'urgent': 'priority-urgent'
+    };
+    return classes[priority as keyof typeof classes] || 'priority-medium';
   }
 
-  getStepCount(routine: Routine): string {
-    const count = routine.steps.length;
-    return count === 1 ? '1 paso' : `${count} pasos`;
+  getStatusClass(status: string): string {
+    const classes = {
+      'draft': 'status-draft',
+      'active': 'status-active',
+      'completed': 'status-completed',
+      'archived': 'status-archived'
+    };
+    return classes[status as keyof typeof classes] || 'status-draft';
   }
 
-  getModelStatus(routine: Routine): string {
-    const has3D = !!routine.model_3d;
-    const hasInference = !!routine.model_inference;
-    
-    if (has3D && hasInference) return 'Completo';
-    if (has3D || hasInference) return 'Parcial';
-    return 'Sin modelos';
+  getUserNames(users: User[]): string {
+    return users.map(user => user.username).join(', ');
   }
 
-  getModelStatusClass(routine: Routine): string {
-    const has3D = !!routine.model_3d;
-    const hasInference = !!routine.model_inference;
-    
-    if (has3D && hasInference) return 'badge--success';
-    if (has3D || hasInference) return 'badge--warning';
-    return 'badge--secondary';
-  }
-
-  // Clear all filters
-  clearFilters(): void {
-    this.searchTerm = '';
-    this.selectedStatus = '';
-    this.selectedPriority = '';
-    this.selectedDepartment = '';
-    this.selectedAssignedUser = '';
-    this.applyFilters();
-  }
-
-  // Toggle analytics view
-  toggleAnalytics(): void {
-    this.showAnalytics = !this.showAnalytics;
-    if (this.showAnalytics && !this.analytics) {
-      this.loadAnalytics();
-    }
-  }
-
-  // Execute routine
-  executeRoutine(routine: Routine): void {
-    this.isLoading = true;
-    this.routineService.executeRoutine(routine.id).subscribe({
-      next: (updatedRoutine) => {
-        const index = this.routines.findIndex(r => r.id === routine.id);
-        if (index > -1) {
-          this.routines[index] = updatedRoutine;
-          this.applyFilters();
-        }
-        this.loadAnalytics(); // Refresh analytics
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error executing routine:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  // Change routine status
-  changeRoutineStatus(routine: Routine, newStatus: Routine['status']): void {
-    this.isLoading = true;
-    this.routineService.updateRoutineStatus(routine.id, newStatus).subscribe({
-      next: (updatedRoutine) => {
-        const index = this.routines.findIndex(r => r.id === routine.id);
-        if (index > -1) {
-          this.routines[index] = updatedRoutine;
-          this.applyFilters();
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error updating routine status:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  // Get status label and color
-  getStatusInfo(status: Routine['status']): { label: string; color: string } {
-    const statusOption = this.statusOptions.find(opt => opt.value === status);
-    return statusOption || { label: status, color: 'secondary' };
-  }
-
-  // Get priority label and color
-  getPriorityInfo(priority: Routine['priority']): { label: string; color: string } {
-    const priorityOption = this.priorityOptions.find(opt => opt.value === priority);
-    return priorityOption || { label: priority, color: 'secondary' };
-  }
-
-  // Get assigned users names
-  getAssignedUsersNames(users: User[]): string {
-    if (users.length === 0) return 'Sin asignar';
-    if (users.length === 1) return users[0].username;
-    if (users.length === 2) return `${users[0].username} y ${users[1].username}`;
-    return `${users[0].username} y ${users.length - 1} más`;
-  }
-
-  // Format duration
   formatDuration(minutes: number): string {
-    if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
   }
 
-  // Check if routine can be executed
-  canExecuteRoutine(routine: Routine): boolean {
-    return routine.status === 'active' && routine.assignedUsers.length > 0;
-  }
+  onUserSelectionChange(event: any, userId: string): void {
+    const currentUsers = this.routineForm.get('assignedUsers')?.value || [];
+    let updatedUsers: string[];
 
-  // Get unique departments for filter
-  getUniqueDepartments(): string[] {
-    const departments = new Set(
-      this.routines
-        .map(r => r.department)
-        .filter((dept): dept is string => dept !== undefined && dept.trim() !== '')
-    );
-    return Array.from(departments).sort();
-  }
+    if (event.target.checked) {
+      updatedUsers = [...currentUsers, userId];
+    } else {
+      updatedUsers = currentUsers.filter((id: string) => id !== userId);
+    }
 
-  trackByRoutineId(index: number, routine: Routine): string {
-    return routine.id;
-  }
-
-  trackByIndex(index: number): number {
-    return index;
+    this.routineForm.patchValue({ assignedUsers: updatedUsers });
   }
 }

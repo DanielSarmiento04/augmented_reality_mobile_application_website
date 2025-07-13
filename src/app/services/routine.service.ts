@@ -194,7 +194,7 @@ export class RoutineService {
     };
 
     this.routines.push(newRoutine);
-    
+
     return of(newRoutine).pipe(delay(1000));
   }
 
@@ -203,7 +203,7 @@ export class RoutineService {
    */
   updateRoutine(id: string, routineData: Partial<Routine>): Observable<Routine> {
     const routineIndex = this.routines.findIndex(r => r.id === id);
-    
+
     if (routineIndex === -1) {
       return throwError(() => new Error('Routine not found'));
     }
@@ -221,7 +221,7 @@ export class RoutineService {
     };
 
     this.routines[routineIndex] = updatedRoutine;
-    
+
     return of(updatedRoutine).pipe(delay(1000));
   }
 
@@ -230,13 +230,13 @@ export class RoutineService {
    */
   deleteRoutine(id: string): Observable<boolean> {
     const routineIndex = this.routines.findIndex(r => r.id === id);
-    
+
     if (routineIndex === -1) {
       return throwError(() => new Error('Routine not found'));
     }
 
     this.routines.splice(routineIndex, 1);
-    
+
     return of(true).pipe(delay(500));
   }
 
@@ -244,22 +244,22 @@ export class RoutineService {
    * Search routines
    */
   searchRoutines(searchTerm: string): Observable<Routine[]> {
-    const filteredRoutines = this.routines.filter(routine => 
+    const filteredRoutines = this.routines.filter(routine =>
       routine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       routine.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       routine.steps.some(step => step.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-    
+
     return of(filteredRoutines).pipe(delay(500));
   }
 
   /**
    * Get routine statistics
    */
-  getRoutineStats(): Observable<{ 
-    total: number; 
-    withModel3D: number; 
-    withInference: number; 
+  getRoutineStats(): Observable<{
+    total: number;
+    withModel3D: number;
+    withInference: number;
     avgSteps: number;
   }> {
     const stats = {
@@ -268,7 +268,7 @@ export class RoutineService {
       withInference: this.routines.filter(r => r.model_inference).length,
       avgSteps: this.routines.reduce((sum, r) => sum + r.steps.length, 0) / this.routines.length
     };
-    
+
     return of(stats).pipe(delay(300));
   }
 
@@ -277,7 +277,7 @@ export class RoutineService {
    */
   duplicateRoutine(id: string): Observable<Routine> {
     const routine = this.routines.find(r => r.id === id);
-    
+
     if (!routine) {
       return throwError(() => new Error('Routine not found'));
     }
@@ -291,7 +291,7 @@ export class RoutineService {
     };
 
     this.routines.push(duplicatedRoutine);
-    
+
     return of(duplicatedRoutine).pipe(delay(1000));
   }
 
@@ -310,19 +310,19 @@ export class RoutineService {
    */
   assignUsersToRoutine(routineId: string, userIds: string[]): Observable<Routine> {
     const routineIndex = this.routines.findIndex(r => r.id === routineId);
-    
+
     if (routineIndex === -1) {
       return throwError(() => new Error('Routine not found'));
     }
 
     const assignedUsers = this.mockUsers.filter(user => userIds.includes(user.id));
-    
+
     this.routines[routineIndex] = {
       ...this.routines[routineIndex],
       assignedUsers,
       updatedAt: new Date()
     };
-    
+
     return of(this.routines[routineIndex]).pipe(delay(1000));
   }
 
@@ -331,7 +331,7 @@ export class RoutineService {
    */
   updateRoutineStatus(id: string, status: Routine['status']): Observable<Routine> {
     const routineIndex = this.routines.findIndex(r => r.id === id);
-    
+
     if (routineIndex === -1) {
       return throwError(() => new Error('Routine not found'));
     }
@@ -341,7 +341,7 @@ export class RoutineService {
       status,
       updatedAt: new Date()
     };
-    
+
     return of(this.routines[routineIndex]).pipe(delay(500));
   }
 
@@ -350,7 +350,7 @@ export class RoutineService {
    */
   executeRoutine(id: string): Observable<Routine> {
     const routineIndex = this.routines.findIndex(r => r.id === id);
-    
+
     if (routineIndex === -1) {
       return throwError(() => new Error('Routine not found'));
     }
@@ -361,7 +361,7 @@ export class RoutineService {
       lastExecuted: new Date(),
       updatedAt: new Date()
     };
-    
+
     return of(this.routines[routineIndex]).pipe(delay(1000));
   }
 
@@ -390,13 +390,13 @@ export class RoutineService {
     }
 
     if (filters.assignedUserId) {
-      filteredRoutines = filteredRoutines.filter(r => 
+      filteredRoutines = filteredRoutines.filter(r =>
         r.assignedUsers.some(user => user.id === filters.assignedUserId)
       );
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      filteredRoutines = filteredRoutines.filter(r => 
+      filteredRoutines = filteredRoutines.filter(r =>
         filters.tags!.some(tag => r.tags.includes(tag))
       );
     }
@@ -418,7 +418,7 @@ export class RoutineService {
     const analytics = {
       totalExecutions: this.routines.reduce((sum, r) => sum + r.executionCount, 0),
       averageDuration: this.routines.reduce((sum, r) => sum + r.estimatedDuration, 0) / this.routines.length,
-      mostActiveRoutine: this.routines.reduce((prev, current) => 
+      mostActiveRoutine: this.routines.reduce((prev, current) =>
         prev.executionCount > current.executionCount ? prev : current
       ),
       statusDistribution: this.routines.reduce((dist, routine) => {
@@ -435,7 +435,7 @@ export class RoutineService {
         return dist;
       }, {} as { [key: string]: number })
     };
-    
+
     return of(analytics).pipe(delay(800));
   }
 }
