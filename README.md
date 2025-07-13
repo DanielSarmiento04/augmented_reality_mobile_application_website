@@ -8,7 +8,7 @@
 [![Angular](https://img.shields.io/badge/Angular-19-red?style=flat-square&logo=angular)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/License-Research%20Only-orange?style=flat-square)](LICENSE)
 
 </div>
 
@@ -415,7 +415,29 @@ export const environment = {
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed for **Research and Educational Use Only** - see the [LICENSE](LICENSE) file for details.
+
+### License Terms
+
+- ✅ **Permitted Uses:**
+  - Academic research and study
+  - Educational purposes in academic institutions
+  - Non-commercial research projects
+  - Citation in academic publications
+
+- ❌ **Prohibited Uses:**
+  - Commercial use or distribution
+  - Selling or licensing for profit
+  - Integration into commercial products
+  - Use in production environments for business purposes
+
+- 📋 **Requirements:**
+  - Proper attribution to original authors
+  - Citation of Universidad Industrial de Santander (UIS)
+  - Notification of usage for research tracking
+  - Sharing of improvements back to the academic community
+
+**For commercial licensing inquiries, please contact the authors directly.**
 
 ## 📞 Support
 
