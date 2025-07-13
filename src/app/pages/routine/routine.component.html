@@ -1,1 +1,461 @@
-<p>routine works!</p>
+<div class="routine-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <i class="icon-settings"></i>
+          Gestión de Rutinas
+        </h1>
+        <p class="page-subtitle">
+          Administra las rutinas de trabajo y procedimientos del sistema
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          class="btn btn--primary"
+          (click)="openCreateModal()"
+          [disabled]="isLoading"
+        >
+          <i class="icon-plus"></i>
+          Nueva Rutina
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="filters-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <i class="icon-search search-icon"></i>
+        <input
+          type="text"
+          placeholder="Buscar rutinas por nombre, descripción o pasos..."
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+        />
+        @if (searchTerm) {
+          <button
+            class="btn btn--ghost btn--sm clear-search"
+            (click)="searchTerm = ''; onSearch()"
+          >
+            <i class="icon-x"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="results-info">
+      <span class="results-count">
+        Mostrando {{ paginatedRoutines.length }} de {{ filteredRoutines.length }} rutinas
+      </span>
+    </div>
+  </div>
+
+  <!-- Routines Grid -->
+  <div class="routines-container" [class.loading]="isLoading">
+    <div class="routines-grid">
+      @for (routine of paginatedRoutines; track trackByRoutineId($index, routine)) {
+        <div class="routine-card">
+          <div class="card-header">
+            <div class="routine-info">
+              <h3 class="routine-name">{{ routine.name }}</h3>
+              <p class="routine-description">{{ routine.description }}</p>
+            </div>
+            <div class="routine-status">
+              <span class="badge" [class]="getModelStatusClass(routine)">
+                {{ getModelStatus(routine) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="routine-stats">
+              <div class="stat-item">
+                <i class="icon-list"></i>
+                <span>{{ getStepCount(routine) }}</span>
+              </div>
+              <div class="stat-item">
+                <i class="icon-calendar"></i>
+                <span>{{ formatDate(routine.updatedAt) }}</span>
+              </div>
+            </div>
+
+            <div class="routine-models">
+              <div class="model-item" [class.available]="routine.model_3d">
+                <i class="icon-box"></i>
+                <span>Modelo 3D</span>
+                @if (routine.model_3d) {
+                  <i class="icon-check status-icon"></i>
+                } @else {
+                  <i class="icon-x status-icon"></i>
+                }
+              </div>
+              <div class="model-item" [class.available]="routine.model_inference">
+                <i class="icon-cpu"></i>
+                <span>Inferencia</span>
+                @if (routine.model_inference) {
+                  <i class="icon-check status-icon"></i>
+                } @else {
+                  <i class="icon-x status-icon"></i>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button
+              class="btn btn--ghost btn--sm action-btn"
+              (click)="openEditModal(routine)"
+              [disabled]="isLoading"
+              title="Editar rutina"
+            >
+              <i class="icon-edit"></i>
+            </button>
+
+            <button
+              class="btn btn--ghost btn--sm action-btn"
+              (click)="duplicateRoutine(routine)"
+              [disabled]="isLoading"
+              title="Duplicar rutina"
+            >
+              <i class="icon-copy"></i>
+            </button>
+
+            <button
+              class="btn btn--ghost btn--sm action-btn delete-btn"
+              (click)="confirmDelete(routine)"
+              [disabled]="isLoading"
+              title="Eliminar rutina"
+            >
+              <i class="icon-trash"></i>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (!isLoading && paginatedRoutines.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="icon-settings"></i>
+          </div>
+          <h3 class="empty-title">No se encontraron rutinas</h3>
+          <p class="empty-description">
+            @if (searchTerm) {
+              No hay rutinas que coincidan con "{{ searchTerm }}"
+            } @else {
+              Aún no has creado ninguna rutina. Crea tu primera rutina para comenzar.
+            }
+          </p>
+          @if (!searchTerm) {
+            <button
+              class="btn btn--primary"
+              (click)="openCreateModal()"
+            >
+              <i class="icon-plus"></i>
+              Crear Primera Rutina
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <span>Cargando rutinas...</span>
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages > 1 && !isLoading) {
+    <div class="pagination-container">
+      <div class="pagination">
+        <button
+          class="btn btn--ghost btn--sm"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <i class="icon-chevron-left"></i>
+        </button>
+
+        @for (page of [].constructor(totalPages); track $index) {
+          <button
+            class="btn btn--ghost btn--sm page-btn"
+            [class.active]="currentPage === $index + 1"
+            (click)="changePage($index + 1)"
+          >
+            {{ $index + 1 }}
+          </button>
+        }
+
+        <button
+          class="btn btn--ghost btn--sm"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <i class="icon-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Routine Modal -->
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal modal--large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i [class]="isEditMode ? 'icon-edit' : 'icon-plus'"></i>
+          {{ isEditMode ? 'Editar Rutina' : 'Crear Nueva Rutina' }}
+        </h2>
+        <button class="btn btn--ghost btn--sm close-btn" (click)="closeModal()">
+          <i class="icon-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="routineForm" class="routine-form">
+          <!-- Basic Information -->
+          <div class="form-section">
+            <h3 class="section-title">Información Básica</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name" class="form-label">
+                  <i class="icon-type"></i>
+                  Nombre de la Rutina
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  class="form-input"
+                  placeholder="Ingrese el nombre de la rutina"
+                />
+                @if (routineForm.get('name')?.errors && routineForm.get('name')?.touched) {
+                  <div class="form-error">
+                    @if (routineForm.get('name')?.errors?.['required']) {
+                      <span>El nombre es requerido</span>
+                    }
+                    @if (routineForm.get('name')?.errors?.['minlength']) {
+                      <span>El nombre debe tener al menos 3 caracteres</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="description" class="form-label">
+                  <i class="icon-file-text"></i>
+                  Descripción
+                </label>
+                <textarea
+                  id="description"
+                  formControlName="description"
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Describe el propósito y objetivo de esta rutina"
+                ></textarea>
+                @if (routineForm.get('description')?.errors && routineForm.get('description')?.touched) {
+                  <div class="form-error">
+                    @if (routineForm.get('description')?.errors?.['required']) {
+                      <span>La descripción es requerida</span>
+                    }
+                    @if (routineForm.get('description')?.errors?.['minlength']) {
+                      <span>La descripción debe tener al menos 10 caracteres</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Steps Section -->
+          <div class="form-section">
+            <div class="section-header">
+              <h3 class="section-title">Pasos de la Rutina</h3>
+              <button
+                type="button"
+                class="btn btn--secondary btn--sm"
+                (click)="addStep()"
+              >
+                <i class="icon-plus"></i>
+                Agregar Paso
+              </button>
+            </div>
+
+            <div class="steps-container" formArrayName="steps">
+              @for (stepControl of stepsArray.controls; track trackByIndex($index)) {
+                <div class="step-item" [formGroupName]="$index">
+                  <div class="step-number">{{ $index + 1 }}</div>
+                  <div class="step-input-group">
+                    <input
+                      type="text"
+                      [formControlName]="$index"
+                      class="form-input"
+                      [placeholder]="'Paso ' + ($index + 1)"
+                    />
+                    @if (stepControl.errors && stepControl.touched) {
+                      <div class="form-error">
+                        <span>Este paso es requerido</span>
+                      </div>
+                    }
+                  </div>
+                  @if (stepsArray.length > 1) {
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm remove-step-btn"
+                      (click)="removeStep($index)"
+                      title="Eliminar paso"
+                    >
+                      <i class="icon-trash"></i>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Models Section -->
+          <div class="form-section">
+            <h3 class="section-title">Modelos Asociados</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="model_3d" class="form-label">
+                  <i class="icon-box"></i>
+                  Modelo 3D
+                </label>
+                <input
+                  type="text"
+                  id="model_3d"
+                  formControlName="model_3d"
+                  class="form-input"
+                  placeholder="Ruta o nombre del archivo del modelo 3D (opcional)"
+                />
+                <div class="form-help">
+                  Especifica el archivo del modelo 3D asociado a esta rutina
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="model_inference" class="form-label">
+                  <i class="icon-cpu"></i>
+                  Modelo de Inferencia
+                </label>
+                <input
+                  type="text"
+                  id="model_inference"
+                  formControlName="model_inference"
+                  class="form-input"
+                  placeholder="Ruta o nombre del archivo del modelo de inferencia (opcional)"
+                />
+                <div class="form-help">
+                  Especifica el archivo del modelo de inferencia para esta rutina
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn--outline"
+          (click)="closeModal()"
+          [disabled]="isLoading"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          (click)="onSubmit()"
+          [disabled]="routineForm.invalid || isLoading"
+          [class.loading]="isLoading"
+        >
+          @if (!isLoading) {
+            <span>
+              <i [class]="isEditMode ? 'icon-save' : 'icon-plus'"></i>
+              {{ isEditMode ? 'Actualizar' : 'Crear' }} Rutina
+            </span>
+          } @else {
+            <span class="btn-loading">
+              <div class="loading-spinner"></div>
+              {{ isEditMode ? 'Actualizando...' : 'Creando...' }}
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm) {
+  <div class="modal-overlay danger" (click)="cancelDelete()">
+    <div class="modal modal--danger" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="icon-alert-triangle"></i>
+          Confirmar Eliminación
+        </h2>
+      </div>
+
+      <div class="modal-body">
+        <p class="confirm-message">
+          ¿Estás seguro de que deseas eliminar la rutina
+          <strong>"{{ routineToDelete?.name }}"</strong>?
+        </p>
+        <p class="confirm-warning">
+          Esta acción no se puede deshacer y se perderán todos los datos asociados.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn--outline"
+          (click)="cancelDelete()"
+          [disabled]="isLoading"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--danger"
+          (click)="deleteRoutine()"
+          [disabled]="isLoading"
+          [class.loading]="isLoading"
+        >
+          @if (!isLoading) {
+            <span>
+              <i class="icon-trash"></i>
+              Eliminar Rutina
+            </span>
+          } @else {
+            <span class="btn-loading">
+              <div class="loading-spinner"></div>
+              Eliminando...
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

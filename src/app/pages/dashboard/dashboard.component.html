@@ -1,1 +1,246 @@
-<p>dashboard works!</p>
+<div class="dashboard-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <i class="icon-grid"></i>
+          Panel de Control
+        </h1>
+        <p class="page-subtitle">
+          Bienvenido al sistema de gestión de realidad aumentada
+        </p>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ totalUsers }}</div>
+          <div class="stat-label">Usuarios</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalRoutines }}</div>
+          <div class="stat-label">Rutinas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ activeProjects }}</div>
+          <div class="stat-label">Proyectos Activos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Cards -->
+  <div class="navigation-section">
+    <h2 class="section-title">Módulos del Sistema</h2>
+
+    <div class="nav-grid">
+      <!-- AR Annotation Tool -->
+      <div class="nav-card" (click)="navigateTo('/labels')">
+        <div class="card-icon">
+          <i class="icon-target"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Herramienta de Anotación</h3>
+          <p class="card-description">
+            Crea y gestiona anotaciones para modelos YOLO con herramientas avanzadas de IA
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">YOLO</span>
+            <span class="feature-tag">IA</span>
+            <span class="feature-tag">Anotaciones</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-arrow-right"></i>
+        </div>
+      </div>
+
+      <!-- User Management -->
+      <div class="nav-card" (click)="navigateTo('/admins')">
+        <div class="card-icon">
+          <i class="icon-users"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Gestión de Usuarios</h3>
+          <p class="card-description">
+            Administra usuarios del sistema, roles y permisos de acceso
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">CRUD</span>
+            <span class="feature-tag">Roles</span>
+            <span class="feature-tag">Permisos</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-arrow-right"></i>
+        </div>
+      </div>
+
+      <!-- Routine Management -->
+      <div class="nav-card" (click)="navigateTo('/routine')">
+        <div class="card-icon">
+          <i class="icon-settings"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Gestión de Rutinas</h3>
+          <p class="card-description">
+            Crea, asigna y gestiona rutinas de trabajo con seguimiento avanzado
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">Asignación</span>
+            <span class="feature-tag">Analytics</span>
+            <span class="feature-tag">Seguimiento</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-arrow-right"></i>
+        </div>
+      </div>
+
+      <!-- AR Models (Future) -->
+      <div class="nav-card disabled">
+        <div class="card-icon">
+          <i class="icon-box"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Modelos 3D</h3>
+          <p class="card-description">
+            Gestiona modelos 3D para experiencias de realidad aumentada
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">3D</span>
+            <span class="feature-tag">AR</span>
+            <span class="feature-tag">Próximamente</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-clock"></i>
+        </div>
+      </div>
+
+      <!-- Analytics (Future) -->
+      <div class="nav-card disabled">
+        <div class="card-icon">
+          <i class="icon-bar-chart"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Analytics</h3>
+          <p class="card-description">
+            Visualiza métricas y estadísticas del uso del sistema
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">Métricas</span>
+            <span class="feature-tag">Reportes</span>
+            <span class="feature-tag">Próximamente</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-clock"></i>
+        </div>
+      </div>
+
+      <!-- Mobile App (Future) -->
+      <div class="nav-card disabled">
+        <div class="card-icon">
+          <i class="icon-smartphone"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">App Móvil</h3>
+          <p class="card-description">
+            Aplicación móvil para experiencias de realidad aumentada
+          </p>
+          <div class="card-features">
+            <span class="feature-tag">AR</span>
+            <span class="feature-tag">Móvil</span>
+            <span class="feature-tag">Próximamente</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <i class="icon-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="activity-section">
+    <h2 class="section-title">Actividad Reciente</h2>
+
+    <div class="activity-grid">
+      <div class="activity-card">
+        <div class="activity-header">
+          <h3>Rutinas Ejecutadas</h3>
+          <span class="activity-count">{{ recentRoutines }}</span>
+        </div>
+        <div class="activity-content">
+          <div class="activity-chart">
+            <!-- Placeholder for chart -->
+            <div class="chart-placeholder">
+              <i class="icon-trending-up"></i>
+              <span>+15% esta semana</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-header">
+          <h3>Usuarios Activos</h3>
+          <span class="activity-count">{{ activeUsers }}</span>
+        </div>
+        <div class="activity-content">
+          <div class="activity-chart">
+            <!-- Placeholder for chart -->
+            <div class="chart-placeholder">
+              <i class="icon-users"></i>
+              <span>{{ activeUsers }} conectados</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-card">
+        <div class="activity-header">
+          <h3>Anotaciones Creadas</h3>
+          <span class="activity-count">{{ totalAnnotations }}</span>
+        </div>
+        <div class="activity-content">
+          <div class="activity-chart">
+            <!-- Placeholder for chart -->
+            <div class="chart-placeholder">
+              <i class="icon-target"></i>
+              <span>{{ totalAnnotations }} este mes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <h2 class="section-title">Acciones Rápidas</h2>
+
+    <div class="actions-grid">
+      <button class="action-btn" (click)="navigateTo('/routine')">
+        <i class="icon-plus"></i>
+        <span>Nueva Rutina</span>
+      </button>
+
+      <button class="action-btn" (click)="navigateTo('/admins')">
+        <i class="icon-user-plus"></i>
+        <span>Nuevo Usuario</span>
+      </button>
+
+      <button class="action-btn" (click)="navigateTo('/labels')">
+        <i class="icon-edit"></i>
+        <span>Crear Anotación</span>
+      </button>
+
+      <button class="action-btn disabled">
+        <i class="icon-download"></i>
+        <span>Exportar Datos</span>
+      </button>
+    </div>
+  </div>
+</div>
