@@ -224,13 +224,14 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-6);
+  gap: var(--spacing-7);
+  flex: 1;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-3);
 }
 
 .form-label {
@@ -630,10 +631,24 @@
 .icon-google::before { content: "🌐"; }
 
 // === RESPONSIVE DESIGN ===
+@media (max-width: 768px) and (min-width: 481px) {
+  .login-card {
+    max-width: 460px;
+    min-height: 640px;
+    padding: var(--spacing-10);
+  }
+
+  .form-title {
+    font-size: var(--font-size-2xl);
+  }
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: var(--spacing-6);
     border-radius: var(--border-radius-2xl);
+    min-height: 580px;
+    max-width: 380px;
   }
 
   .brand-logo {
@@ -641,7 +656,7 @@
     height: 100px;
   }
 
-  .brand-title {
+  .form-title {
     font-size: var(--font-size-2xl);
   }
 

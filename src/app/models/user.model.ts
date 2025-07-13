@@ -1,4 +1,3 @@
-import { Routine } from "./routines.model";
 
 
 export type UserRole = 'admin' | 'user' | 'guest';
@@ -12,5 +11,4 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   role: UserRole;
-  routines?: Routine[]; // Optional, can be populated later
 }

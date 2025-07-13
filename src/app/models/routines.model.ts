@@ -5,7 +5,6 @@ export interface Routine {
   steps : string[];
   createdAt: Date;
   updatedAt: Date;
-  userId: string;
   model_3d: File | string | null;
   model_inference: File | string | null;
 }

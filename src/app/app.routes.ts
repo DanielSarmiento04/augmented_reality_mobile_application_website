@@ -7,8 +7,8 @@ import { AdminsComponent } from "./pages/admins/admins.component";
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'labels', component: LabelsComponent, title: 'YOLO Annotation Tool' },
-  { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'admins', component: AdminsComponent },
+  { path: 'login', component: LoginComponent, title: 'AR App - Login' },
+  { path: 'dashboard', component: DashboardComponent, title: 'AR App - Dashboard' },
+  { path: 'admins', component: AdminsComponent, title: 'AR App - Gestión de Usuarios' },
   { path: '**', redirectTo: '/labels' }
 ];
