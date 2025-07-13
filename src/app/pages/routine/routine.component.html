@@ -246,7 +246,7 @@
         </button>
       </div>
 
-      <form [formGroup]="routineForm" class="modal-form">
+      <form [formGroup]="routineForm" class="modal-form" (scroll)="onModalScroll($event)">
         <div class="form-section">
           <h3 class="section-title">Información Básica</h3>
 
